@@ -1,12 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import styles from '../styles/PDFViewer.module.css';
-
-import { Viewer, Worker } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { useState } from 'react';
 
 const availablePdfs = [
   { id: 1, name: 'ACE AP Calculus AB', url: '/pdfs/ACE_AP_Calculus_AB.pdf' },
@@ -18,9 +12,8 @@ const availablePdfs = [
   { id: 7, name: 'ACE The AMC 10 and 12', url: '/pdfs/ACE_The_AMC_10_and_12.pdf' },
 ];
 
-const BooksPage = () => {
+export default function BooksPage() {
   const [selectedPdf, setSelectedPdf] = useState<string>('');
-  const defaultLayout = useMemo(() => defaultLayoutPlugin(), []);
 
   return (
     <div className="min-h-screen bg-slate-50 py-12">
@@ -65,24 +58,24 @@ const BooksPage = () => {
             </div>
           </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">Preview</h2>
-              <div className={`${styles.pdfContainer} mt-4`}>
-              <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-                {selectedPdf ? (
-                  <Viewer fileUrl={selectedPdf} plugins={[defaultLayout]} />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center rounded bg-slate-50 text-sm text-slate-500">
-                    Select a resource to start reading.
-                  </div>
-                )}
-              </Worker>
+            <div className="mt-4">
+              {selectedPdf ? (
+                <iframe
+                  src={selectedPdf}
+                  className="w-full h-[800px] border border-slate-300 rounded"
+                  title="PDF Viewer"
+                />
+              ) : (
+                <div className="flex h-[800px] w-full items-center justify-center rounded bg-slate-50 text-sm text-slate-500">
+                  Select a resource to start reading.
+                </div>
+              )}
             </div>
           </div>
         </section>
       </div>
     </div>
   );
-};
-
-export default BooksPage;
+}

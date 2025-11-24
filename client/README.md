@@ -4,10 +4,11 @@ This is the Next.js frontend for The Math and Science Academy (TMAS), an educati
 
 ## Tech Stack
 
-- **Next.js 15** with React 19
+- **Next.js 15** with React 19 (App Router)
 - **TypeScript**
 - **Tailwind CSS v4** with PostCSS
 - **Lucide React** for icons
+- **react-pdf** for PDF viewing (latest pdfjs-dist)
 - **Turbopack** for fast builds
 
 ## Getting Started
@@ -31,26 +32,30 @@ npm start       # Start production server
 
 ```
 client/
-├── components/      # Reusable React components
+├── app/              # App Router (Next.js 15)
+│   ├── layout.tsx    # Root layout with Navigation & Footer
+│   ├── page.tsx      # Home page
+│   ├── about/        # About page
+│   ├── books/        # Books page with PDF viewer
+│   ├── contact/      # Contact page
+│   ├── donate/       # Donate page
+│   ├── join/         # Join page
+│   └── resources/    # Resources page
+├── components/       # Reusable React components
 │   ├── Navigation.tsx
 │   └── Footer.tsx
-├── pages/          # Next.js pages
-│   ├── index.tsx   # Home page
-│   ├── about.tsx   # About page
-│   ├── resources.tsx
-│   ├── contact.tsx
-│   ├── join.tsx
-│   ├── donate.tsx
-│   └── api/        # API routes
 ├── styles/
-│   └── globals.css # Global Tailwind styles
-└── public/         # Static assets
+│   ├── globals.css   # Global Tailwind styles
+│   └── PDFViewer.module.css # PDF viewer styles
+└── public/
+    └── pdfs/         # ACE series study guides (7 PDFs)
 ```
 
 ## Pages
 
 - **Home** (`/`) - Landing page with mission and features
 - **About** (`/about`) - Organization information
+- **Books** (`/books`) - Interactive PDF viewer for study guides
 - **Resources** (`/resources`) - Educational materials
 - **Contact** (`/contact`) - Contact form
 - **Join** (`/join`) - Community/Discord info

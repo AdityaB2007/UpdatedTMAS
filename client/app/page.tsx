@@ -1,14 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { BookOpen, Users, Calendar, FileText } from 'lucide-react';
-import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
 
-export default function TMASHomepage() {
+export default function HomePage() {
   return (
-    <>
-      <Navigation />
-      <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
       <section className="px-4 py-16 max-w-5xl mx-auto">
         <div className="space-y-6">
@@ -16,7 +12,7 @@ export default function TMASHomepage() {
             The Math and Science Academy
           </h1>
           <p className="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
-            TMAS empowers students with high-quality, free educational resources 
+            TMAS empowers students with high-quality, free educational resources
             that make advanced math and science accessible to everyone.
           </p>
 
@@ -82,7 +78,5 @@ export default function TMASHomepage() {
         </div>
       </section>
     </div>
-    <Footer />
-    </>
   );
 }
