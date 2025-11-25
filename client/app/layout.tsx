@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import Navigation from "@/components/Navigation";
+import Navbar from "@/components/navigation/Navbar";
 import Footer from "@/components/Footer";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "TMAS - The Math and Science Academy",
@@ -14,10 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        <Navigation />
-        {children}
+    <html lang="en" className={inter.variable}>
+      <body className="font-sans antialiased">
+        <Navbar />
+        <main className="flex-1">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

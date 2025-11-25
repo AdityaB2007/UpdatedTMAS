@@ -16,65 +16,36 @@ export default function BooksPage() {
   const [selectedPdf, setSelectedPdf] = useState<string>('');
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
-      <div className="max-w-5xl mx-auto px-4 space-y-10">
-        <header className="space-y-3 text-center">
-          <h1 className="text-4xl font-bold text-slate-900">Explore Free Resources</h1>
-          <p className="text-slate-600">
-            Select one of our curated TMAS study guides to view it directly in your browser.
-          </p>
-        </header>
+    <div className="min-h-screen bg-primary pt-40 pb-24">
+      <div className="max-w-7xl mx-auto px-4 space-y-8">
+        <h1 className="text-4xl font-bold text-white text-center">Browse Books</h1>
 
-        <section className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label htmlFor="pdf-select" className="block text-sm font-medium text-slate-700">
-                Choose a PDF
-              </label>
-              <select
-                id="pdf-select"
-                className="mt-2 w-full rounded border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                value={selectedPdf}
-                onChange={(event) => setSelectedPdf(event.target.value)}
-              >
-                <option value="">Select a resource…</option>
-                {availablePdfs.map((pdf) => (
-                  <option key={pdf.id} value={pdf.url}>
-                    {pdf.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="space-y-6">
+          <select
+            className="w-full bg-secondary border border-glass-border px-4 py-3 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all cursor-pointer"
+            value={selectedPdf}
+            onChange={(e) => setSelectedPdf(e.target.value)}
+          >
+            <option value="">Select a book...</option>
+            {availablePdfs.map((pdf) => (
+              <option key={pdf.id} value={pdf.url}>
+                {pdf.name}
+              </option>
+            ))}
+          </select>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Resources in This Collection</h2>
-              <ul className="mt-3 space-y-2 text-sm text-slate-600">
-                {availablePdfs.map((pdf) => (
-                  <li key={`${pdf.id}-list`} className="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700">
-                    {pdf.name}
-                  </li>
-                ))}
-              </ul>
+          {selectedPdf ? (
+            <iframe
+              src={selectedPdf}
+              className="w-full h-[700px] border border-glass-border rounded-lg"
+              title="PDF Viewer"
+            />
+          ) : (
+            <div className="w-full h-[700px] border border-glass-border rounded-lg flex items-center justify-center bg-secondary/50">
+              <p className="text-gray-400 text-lg">Select a book from the dropdown to start reading</p>
             </div>
-          </div>
-
-          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">Preview</h2>
-            <div className="mt-4">
-              {selectedPdf ? (
-                <iframe
-                  src={selectedPdf}
-                  className="w-full h-[800px] border border-slate-300 rounded"
-                  title="PDF Viewer"
-                />
-              ) : (
-                <div className="flex h-[800px] w-full items-center justify-center rounded bg-slate-50 text-sm text-slate-500">
-                  Select a resource to start reading.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+          )}
+        </div>
       </div>
     </div>
   );

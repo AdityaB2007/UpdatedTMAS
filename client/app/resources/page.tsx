@@ -1,26 +1,65 @@
+'use client';
+
+import React, { useState } from 'react';
+import PageLayout from '@/components/layout/PageLayout';
+import BookGrid from '@/components/features/books/BookGrid';
+import { books } from '@/data/books';
+
 export default function Resources() {
-  const books = [
-    { title: 'Book Name', author: 'Author Name', pages: '###', problems: '###' },
-    { title: 'Book Name', author: 'Author Name', pages: '###', problems: '###' },
-    { title: 'Book Name', author: 'Author Name', pages: '###', problems: '###' },
-  ];
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter books based on search query
+  const filteredBooks = books.filter(book =>
+    book.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <main className="max-w-5xl mx-auto px-4 py-12 space-y-8">
-      <div className="relative">
-        <input type="text" placeholder="Search for a book..." className="w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-200" />
+    <PageLayout
+      title="Study Guides"
+      subtitle="Free, comprehensive study guides for AP courses and competition math"
+    >
+      {/* Simple Search Bar */}
+      <div style={{ marginBottom: '48px' }}>
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: '100%',
+            maxWidth: '500px',
+            margin: '0 auto',
+            display: 'block',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid var(--glass-border)',
+            color: 'var(--text-primary)',
+            fontSize: '1rem',
+            outline: 'none',
+            transition: 'all 0.3s ease'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'var(--accent-yellow)';
+            e.target.style.boxShadow = '0 0 0 2px rgba(250, 204, 21, 0.2)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'var(--glass-border)';
+            e.target.style.boxShadow = 'none';
+          }}
+        />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {books.map((book, index) => (
-          <div key={index} className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
-            <h2 className="text-xl font-semibold mb-2">{book.title}</h2>
-            <p className="text-sm text-slate-600 mb-2">{book.author}</p>
-            <p className="text-sm text-slate-600 mb-4">{book.pages} pages | {book.problems} problems</p>
-            <a href="#" className="text-indigo-600 font-medium hover:underline">View Details</a>
-          </div>
-        ))}
-      </div>
-    </main>
+      {/* Books Grid */}
+      {filteredBooks.length > 0 ? (
+        <BookGrid books={filteredBooks} />
+      ) : (
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            No books found matching &quot;{searchQuery}&quot;
+          </p>
+        </div>
+      )}
+    </PageLayout>
   );
 }

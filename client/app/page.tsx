@@ -1,80 +1,105 @@
-import React from 'react';
-import Link from 'next/link';
-import { BookOpen, Users, Calendar, FileText } from 'lucide-react';
+'use client';
+
+import React, { useEffect } from 'react';
+import StatsGrid from '@/components/features/stats/StatsGrid';
+import TestimonialSlider from '@/components/features/testimonials/TestimonialSlider';
+import HeroSection from '@/components/features/hero/HeroSection';
+import BookGrid from '@/components/features/books/BookGrid';
+import { books } from '@/data/books';
 
 export default function HomePage() {
+  useEffect(() => {
+    // Add scroll snap behavior on slight scroll from hero
+    let hasScrolled = false;
+
+    const handleWheel = (e: WheelEvent) => {
+      const scrollY = window.scrollY;
+      const heroHeight = window.innerHeight;
+
+      // If at top of page and scrolling down, snap to content
+      if (scrollY < heroHeight * 0.1 && e.deltaY > 0 && !hasScrolled) {
+        hasScrolled = true;
+        const statsSection = document.getElementById('stats-section');
+        if (statsSection) {
+          statsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        // Reset after animation completes
+        setTimeout(() => {
+          hasScrolled = false;
+        }, 1000);
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div style={{ minHeight: '100vh' }}>
       {/* Hero Section */}
-      <section className="px-4 py-16 max-w-5xl mx-auto">
-        <div className="space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-            The Math and Science Academy
-          </h1>
-          <p className="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
-            TMAS empowers students with high-quality, free educational resources
-            that make advanced math and science accessible to everyone.
-          </p>
+      <HeroSection />
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href="/books"
-              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded transition-colors inline-flex items-center justify-center"
-            >
-              Explore FREE Books
-            </Link>
-            <button className="px-6 py-3 bg-blue-600 hover:bg-indigo-700 text-white font-medium rounded transition-colors">
-              Join Community
-            </button>
-          </div>
-        </div>
-
-        {/* Organization Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 pt-16 border-t border-slate-200">
-          <div className="space-y-2 text-center">
-            <BookOpen className="w-8 h-8 text-slate-700 mx-auto" />
-            <div className="text-2xl font-semibold text-slate-900">10+</div>
-            <div className="text-sm text-slate-600">Free Books</div>
-          </div>
-
-          <div className="space-y-2 text-center">
-            <FileText className="w-8 h-8 text-slate-700 mx-auto" />
-            <div className="text-2xl font-semibold text-slate-900">1000+</div>
-            <div className="text-sm text-slate-600">Practice Problems</div>
-          </div>
-
-          <div className="space-y-2 text-center">
-            <Users className="w-8 h-8 text-slate-700 mx-auto" />
-            <div className="text-2xl font-semibold text-slate-900">500+</div>
-            <div className="text-sm text-slate-600">Discord Members</div>
-          </div>
-
-          <div className="space-y-2 text-center">
-            <Calendar className="w-8 h-8 text-slate-700 mx-auto" />
-            <div className="text-2xl font-semibold text-slate-900">2021</div>
-            <div className="text-sm text-slate-600">Founded</div>
-          </div>
-        </div>
-      </section>
+      {/* Stats Grid Section */}
+      <div id="stats-section">
+        <StatsGrid />
+      </div>
 
       {/* Our Resources Section */}
-      <section className="px-4 py-16 border-t border-slate-200">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">
-            Our Resources
-          </h2>
-          {/* Resources content will go here */}
+      <section style={{
+        padding: '80px 24px',
+        borderTop: '1px solid var(--glass-border)'
+      }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <h2 style={{
+              fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+              marginBottom: '16px'
+            }}>
+              Study Guides
+            </h2>
+            <p style={{
+              fontSize: '1rem',
+              color: 'var(--text-secondary)',
+              maxWidth: '500px',
+              margin: '0 auto'
+            }}>
+              Free, comprehensive study guides for AP courses and competitive math
+            </p>
+          </div>
+
+          {/* Book Grid - First 3 Books */}
+          <BookGrid books={books} limit={3} />
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="px-4 py-16 bg-white border-t border-slate-200">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">
-            Testimonials
-          </h2>
-          {/* Testimonials content will go here */}
+      <section style={{
+        padding: '80px 24px 120px',
+        borderTop: '1px solid var(--glass-border)'
+      }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <h2 style={{
+              fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+              marginBottom: '16px'
+            }}>
+              What Students Say
+            </h2>
+            <p style={{
+              fontSize: '1rem',
+              color: 'var(--text-secondary)',
+              maxWidth: '500px',
+              margin: '0 auto'
+            }}>
+              Hear from students who have used our resources
+            </p>
+          </div>
+
+          <TestimonialSlider />
         </div>
       </section>
     </div>

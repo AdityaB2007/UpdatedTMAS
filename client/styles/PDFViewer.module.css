@@ -1,0 +1,14 @@
+.pdfContainer {
+  width: 100%;
+  min-height: 32rem;
+  max-height: 48rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+}
+
