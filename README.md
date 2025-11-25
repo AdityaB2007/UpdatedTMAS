@@ -14,7 +14,7 @@ TMAS Academy is a student-led nonprofit organization dedicated to making high-qu
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router) + React 19
+- **Framework**: Next.js 16 (App Router) + React 19
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + CSS Variables
 - **Animations**: GSAP (ScrollTrigger, Draggable)
