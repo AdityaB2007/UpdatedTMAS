@@ -29,7 +29,26 @@ TMAS Academy is a student-led nonprofit organization dedicated to making high-qu
 - Node.js 18+
 - npm or yarn
 
-### Installation
+### Quick Start (One Command)
+
+Install all dependencies and start the development server with a single command:
+
+**macOS / Linux:**
+```bash
+cd client && npm install && npm run dev
+```
+
+**Windows (Command Prompt):**
+```cmd
+cd client && npm install && npm run dev
+```
+
+**Windows (PowerShell):**
+```powershell
+cd client; npm install; npm run dev
+```
+
+### Installation (Step by Step)
 
 ```bash
 # Clone the repository
