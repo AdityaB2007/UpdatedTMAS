@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 
-export async function POST() {
+export async function POST(): Promise<Response> {
   try {
     const poolData = {
       UserPoolId: process.env.NEXT_PUBLIC_AWS_USER_POOL_ID || '',
@@ -24,7 +24,7 @@ export async function POST() {
 
     const authenticationDetails = new AuthenticationDetails(authenticationData);
 
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (session) => {
           const idToken = session.getIdToken().getJwtToken();

@@ -36,22 +36,6 @@ export default function AnimatedBackground() {
         <div className="gradient-orb gradient-orb-2"></div>
       </div>
 
-      {/* Background grid pattern */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-          transform: 'translateZ(0)',
-        }}
-      ></div>
 
       {/* CSS for animated orbs */}
       <style jsx>{`

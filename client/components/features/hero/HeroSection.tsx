@@ -6,7 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import AnimatedBackground from './AnimatedBackground';
 
 export default function HeroSection() {
-  const discordUrl = process.env.NEXT_PUBLIC_DISCORD_URL || 'https://discord.gg/UKdzN7Ebsh';
+  const discordUrl = process.env.NEXT_PUBLIC_DISCORD_URL || 'https://discord.gg/cANVuvFn3x';
 
   const scrollToContent = () => {
     const statsSection = document.getElementById('stats-section');
@@ -37,6 +37,16 @@ export default function HeroSection() {
         textAlign: 'center',
         padding: '0 24px'
       }}>
+        <div style={{
+          fontSize: '1rem',
+          fontWeight: '600',
+          color: 'var(--accent-yellow)',
+          marginBottom: '0.75rem',
+          letterSpacing: '3px',
+          textTransform: 'uppercase'
+        }}>
+          TMAS Academy
+        </div>
         <h1 style={{
           fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
           fontWeight: 'bold',

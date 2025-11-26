@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import PageLayout from '@/components/layout/PageLayout';
 import { allTeamMembers, departments, getTeamByDepartment, missionStatement, ourStory, TeamMember } from '@/data/team';
@@ -8,6 +8,9 @@ import { X, ChevronDown } from 'lucide-react';
 
 export default function About() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [chevronVisible, setChevronVisible] = useState(true);
+  const [chevronOpacity, setChevronOpacity] = useState(1);
+  const teamHeadingRef = useRef<HTMLHeadingElement>(null);
 
   // Warm color palette for team cards
   const warmColors = [
@@ -19,10 +22,54 @@ export default function About() {
 
   const closeModal = () => setSelectedMember(null);
 
+  // Show chevron only when above the team heading, hide when heading reaches target position
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!teamHeadingRef.current) return;
+
+      const headingRect = teamHeadingRef.current.getBoundingClientRect();
+      // This should match the headerOffset in scrollToTeam (120px)
+      const targetPosition = 120;
+      // Start fading when heading is within 200px of target
+      const fadeStartDistance = 200;
+
+      // headingRect.top is the distance from viewport top to the heading
+      // When heading is at target position, headingRect.top = 120
+
+      if (headingRect.top > targetPosition + fadeStartDistance) {
+        // Heading is far below target - show chevron fully
+        setChevronOpacity(1);
+        setChevronVisible(true);
+      } else if (headingRect.top > targetPosition) {
+        // Heading is approaching target - fade out
+        const fadeProgress = (headingRect.top - targetPosition) / fadeStartDistance;
+        setChevronOpacity(Math.max(0, fadeProgress));
+        setChevronVisible(true);
+      } else {
+        // Heading has reached or passed target - hide immediately
+        setChevronOpacity(0);
+        setChevronVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial position
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const scrollToTeam = () => {
-    const teamSection = document.getElementById('team-section');
-    if (teamSection) {
-      teamSection.scrollIntoView({ behavior: 'smooth' });
+    const teamHeading = teamHeadingRef.current;
+    if (teamHeading) {
+      // Get the heading position and account for navbar height (about 80px) + 20px extra space
+      const headerOffset = 120;
+      const elementPosition = teamHeading.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -41,7 +88,7 @@ export default function About() {
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)'
+            backgroundColor: 'var(--bg-secondary)'
           }}>
             <Image
               src="/youtube-thumbnails.png"
@@ -91,7 +138,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Mission Section - Image on Left, Text on Right */}
+      {/* Mission Section - Text on Left, Image on Right */}
       <section style={{ marginBottom: '64px' }}>
         <div style={{
           display: 'grid',
@@ -99,26 +146,6 @@ export default function About() {
           gap: '48px',
           alignItems: 'center'
         }}>
-          {/* Mission Image */}
-          <div style={{
-            borderRadius: '16px',
-            overflow: 'hidden',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
-            position: 'relative',
-            aspectRatio: '4/3'
-          }}>
-            <Image
-              src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop"
-              alt="Students collaborating and studying together"
-              fill
-              style={{
-                objectFit: 'cover'
-              }}
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-
           {/* Mission Text */}
           <div>
             <h2 style={{
@@ -141,17 +168,57 @@ export default function About() {
               {missionStatement}
             </p>
           </div>
+
+          {/* Mission Image */}
+          <div style={{
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'var(--bg-secondary)',
+            position: 'relative',
+            aspectRatio: '4/3'
+          }}>
+            <Image
+              src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop"
+              alt="Students collaborating and studying together"
+              fill
+              style={{
+                objectFit: 'cover'
+              }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
         </div>
       </section>
 
-      {/* Story Section - Text on Left, Image on Right */}
-      <section style={{ marginBottom: '80px', position: 'relative', paddingBottom: '80px' }}>
+      {/* Story Section - Image on Left, Text on Right */}
+      <section style={{ marginBottom: '80px' }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
           gap: '48px',
           alignItems: 'center'
         }}>
+          {/* Story Image */}
+          <div style={{
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'var(--bg-secondary)',
+            position: 'relative',
+            aspectRatio: '4/3'
+          }}>
+            <Image
+              src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=800&auto=format&fit=crop"
+              alt="Educational resources including books and learning materials"
+              fill
+              style={{
+                objectFit: 'cover'
+              }}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+
           {/* Story Text */}
           <div>
             <h2 style={{
@@ -174,48 +241,42 @@ export default function About() {
               {ourStory}
             </p>
           </div>
-
-          {/* Story Image */}
-          <div style={{
-            borderRadius: '16px',
-            overflow: 'hidden',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
-            position: 'relative',
-            aspectRatio: '4/3'
-          }}>
-            <Image
-              src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=800&auto=format&fit=crop"
-              alt="Educational resources including books and learning materials"
-              fill
-              style={{
-                objectFit: 'cover'
-              }}
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
         </div>
+      </section>
 
-        {/* Scroll Down Indicator - Moved Below Mission and Story */}
+      {/* Fixed Scroll Down Indicator - Shows until team heading is visible */}
+      {chevronVisible && (
         <button
           onClick={scrollToTeam}
           style={{
-            position: 'absolute',
-            bottom: '0',
+            position: 'fixed',
+            bottom: '40px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: 'transparent',
-            border: 'none',
+            background: 'rgba(14, 20, 20, 0.9)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '30px',
+            padding: '12px 24px',
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '8px',
+            gap: '4px',
             color: 'var(--text-secondary)',
-            transition: 'color 0.3s ease'
+            transition: 'all 0.3s ease',
+            zIndex: 50,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+            opacity: chevronOpacity
           }}
-          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-yellow)'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--accent-yellow)';
+            e.currentTarget.style.borderColor = 'var(--accent-yellow)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--text-secondary)';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+          }}
           aria-label="Scroll to team"
         >
           <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>
@@ -223,45 +284,162 @@ export default function About() {
           </span>
           <ChevronDown
             style={{
-              width: '24px',
-              height: '24px',
+              width: '20px',
+              height: '20px',
               animation: 'bounce 2s infinite'
             }}
           />
         </button>
+      )}
 
-        <style jsx>{`
-          @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-              transform: translateY(0);
-            }
-            40% {
-              transform: translateY(-8px);
-            }
-            60% {
-              transform: translateY(-4px);
-            }
+      <style jsx>{`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
           }
-        `}</style>
-      </section>
+          40% {
+            transform: translateY(-6px);
+          }
+          60% {
+            transform: translateY(-3px);
+          }
+        }
+      `}</style>
 
       {/* Team Section - Grouped by Department */}
       <section id="team-section">
-        <h2 style={{
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          color: 'var(--text-primary)',
-          textAlign: 'center',
-          marginBottom: '48px'
-        }}>
+        <h2
+          ref={teamHeadingRef}
+          style={{
+            fontSize: '2rem',
+            fontWeight: 'bold',
+            color: 'var(--text-primary)',
+            textAlign: 'center',
+            marginBottom: '48px'
+          }}
+        >
           Meet Our Team
         </h2>
 
         {(() => {
           let globalIndex = 0;
+
+          // Define row layouts for specific departments
+          // Each number represents how many people in that row
+          const getRowLayout = (department: string, count: number): number[] => {
+            if (department === "Academic Writing" && count === 12) {
+              return [6, 6]; // 2 rows of 6
+            }
+            if (department === "Marketing" && count === 17) {
+              return [5, 6, 6]; // 3 rows: 5, 6, 6
+            }
+            // Default: all in rows of the count or standard layout
+            if (count <= 6) return [count];
+            if (count % 6 === 0) {
+              return Array(count / 6).fill(6);
+            }
+            // Fallback
+            const rows: number[] = [];
+            let remaining = count;
+            while (remaining > 0) {
+              const rowSize = Math.min(6, remaining);
+              rows.push(rowSize);
+              remaining -= rowSize;
+            }
+            return rows;
+          };
+
+          const maxRowWidth = 1000; // Fixed width for all rows
+          const gap = 20;
+
           return departments.map((department) => {
             const members = getTeamByDepartment(department);
             if (members.length === 0) return null;
+
+            const isLeadership = department === "Leadership";
+            const rowLayout = getRowLayout(department, members.length);
+
+            // For leadership, use a different layout
+            if (isLeadership) {
+              const cardWidth = 400;
+              return (
+                <div key={department} style={{ marginBottom: '64px' }}>
+                  <h3 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: '600',
+                    color: 'var(--accent-yellow)',
+                    textAlign: 'center',
+                    marginBottom: '32px',
+                    paddingBottom: '12px',
+                    borderBottom: '2px solid rgba(255, 193, 7, 0.3)',
+                    maxWidth: '300px',
+                    margin: '0 auto 32px'
+                  }}>
+                    {department}
+                  </h3>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}>
+                    {members.map((member) => {
+                      const memberColors = warmColors[globalIndex % warmColors.length];
+                      globalIndex++;
+                      return (
+                        <div key={member.id} style={{ width: `${cardWidth}px` }}>
+                          <TeamCard
+                            member={member}
+                            onClick={() => setSelectedMember(member)}
+                            colors={memberColors}
+                            isLeader={true}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
+
+            // For other departments, render rows with variable card widths
+            let memberIndex = 0;
+            const rows = rowLayout.map((rowCount, rowIdx) => {
+              const rowMembers = members.slice(memberIndex, memberIndex + rowCount);
+              memberIndex += rowCount;
+              // Calculate card width: (total width - gaps) / number of cards
+              const cardWidth = (maxRowWidth - (rowCount - 1) * gap) / rowCount;
+
+              return (
+                <div
+                  key={rowIdx}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: `${gap}px`,
+                    width: `${maxRowWidth}px`,
+                    margin: '0 auto',
+                    marginBottom: rowIdx < rowLayout.length - 1 ? `${gap}px` : '0'
+                  }}
+                >
+                  {rowMembers.map((member) => {
+                    const memberColors = warmColors[globalIndex % warmColors.length];
+                    globalIndex++;
+                    return (
+                      <div key={member.id} style={{
+                        width: `${cardWidth}px`,
+                        height: '180px'
+                      }}>
+                        <TeamCard
+                          member={member}
+                          onClick={() => setSelectedMember(member)}
+                          colors={memberColors}
+                          isLeader={false}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            });
 
             return (
               <div key={department} style={{ marginBottom: '64px' }}>
@@ -278,28 +456,7 @@ export default function About() {
                 }}>
                   {department}
                 </h3>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                  gap: '24px',
-                  maxWidth: '1200px',
-                  margin: '0 auto'
-                }}>
-                  {members.map((member) => {
-                    const memberColors = warmColors[globalIndex % warmColors.length];
-                    const currentIndex = globalIndex;
-                    globalIndex++;
-                    return (
-                      <TeamCard
-                        key={member.id}
-                        member={member}
-                        onClick={() => setSelectedMember(member)}
-                        colors={memberColors}
-                      />
-                    );
-                  })}
-                </div>
+                {rows}
               </div>
             );
           });
@@ -318,11 +475,13 @@ export default function About() {
 function TeamCard({
   member,
   onClick,
-  colors
+  colors,
+  isLeader = false
 }: {
   member: TeamMember;
   onClick: () => void;
   colors: { border: string; hover: string; bg: string; shadow: string; role: string };
+  isLeader?: boolean;
 }) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -332,10 +491,10 @@ function TeamCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: isHovered ? colors.bg : 'rgba(255, 255, 255, 0.05)',
+        backgroundColor: isHovered ? colors.bg : 'var(--bg-secondary)',
         backdropFilter: 'blur(10px)',
         borderRadius: '16px',
-        padding: '24px',
+        padding: isLeader ? '32px' : '16px',
         textAlign: 'center',
         border: isHovered ? `1px solid ${colors.border}` : '1px solid rgba(255, 255, 255, 0.1)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -343,27 +502,33 @@ function TeamCard({
         transform: isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)',
         boxShadow: isHovered
           ? `0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px ${colors.shadow}`
-          : '0 4px 12px rgba(0, 0, 0, 0.1)'
+          : '0 4px 12px rgba(0, 0, 0, 0.1)',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start'
       }}
     >
       {/* Photo */}
       <div style={{
-        width: '120px',
-        height: '120px',
-        margin: '0 auto 16px',
+        width: isLeader ? '150px' : '80px',
+        height: isLeader ? '150px' : '80px',
+        margin: '0 auto 12px',
         borderRadius: '50%',
         overflow: 'hidden',
         border: isHovered ? `3px solid ${colors.border}` : '3px solid rgba(255, 255, 255, 0.2)',
         transition: 'border-color 0.3s ease',
         position: 'relative',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        flexShrink: 0
       }}>
         <Image
           src={member.image}
           alt={member.name}
           fill
           style={{ objectFit: 'cover' }}
-          sizes="120px"
+          sizes={isLeader ? '150px' : '80px'}
         />
       </div>
 
@@ -372,44 +537,48 @@ function TeamCard({
         fontWeight: '600',
         color: 'var(--text-primary)',
         marginBottom: '4px',
-        fontSize: '1rem',
-        transition: 'color 0.3s ease'
+        fontSize: isLeader ? '1.25rem' : '0.85rem',
+        transition: 'color 0.3s ease',
+        lineHeight: '1.2'
       }}>
         {member.name}
       </h3>
 
       {/* Role */}
       <p style={{
-        fontSize: '0.85rem',
+        fontSize: isLeader ? '1rem' : '0.75rem',
         color: isHovered ? colors.role : 'var(--text-secondary)',
         transition: 'color 0.3s ease',
-        marginBottom: '8px'
+        marginBottom: isLeader ? '8px' : '4px',
+        lineHeight: '1.2'
       }}>
         {member.role}
       </p>
 
-      {/* School (if available) */}
-      {member.school && (
+      {/* School (if available) - only show for leader */}
+      {isLeader && member.school && (
         <p style={{
-          fontSize: '0.75rem',
-          color: 'var(--text-muted)',
+          fontSize: '0.85rem',
+          color: 'var(--text-tertiary)',
           fontStyle: 'italic'
         }}>
           {member.school}
         </p>
       )}
 
-      {/* Click indicator */}
-      <div style={{
-        marginTop: '12px',
-        fontSize: '0.7rem',
-        color: isHovered ? colors.role : 'transparent',
-        transition: 'color 0.3s ease',
-        textTransform: 'uppercase',
-        letterSpacing: '1px'
-      }}>
-        Click to learn more
-      </div>
+      {/* Click indicator - only for leader card */}
+      {isLeader && (
+        <div style={{
+          marginTop: '12px',
+          fontSize: '0.7rem',
+          color: isHovered ? colors.role : 'transparent',
+          transition: 'color 0.3s ease',
+          textTransform: 'uppercase',
+          letterSpacing: '1px'
+        }}>
+          Click to learn more
+        </div>
+      )}
     </div>
   );
 }

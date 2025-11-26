@@ -46,8 +46,7 @@ export default function HomePage() {
 
       {/* Our Resources Section */}
       <section style={{
-        padding: '80px 24px',
-        borderTop: '1px solid var(--glass-border)'
+        padding: '80px 24px'
       }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
@@ -76,8 +75,7 @@ export default function HomePage() {
 
       {/* Testimonials Section */}
       <section style={{
-        padding: '80px 24px 120px',
-        borderTop: '1px solid var(--glass-border)'
+        padding: '80px 24px 120px'
       }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>

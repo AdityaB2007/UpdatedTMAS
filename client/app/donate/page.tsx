@@ -18,7 +18,7 @@ export default function Donate() {
           marginBottom: '48px'
         }}>
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            backgroundColor: 'var(--bg-secondary)',
             borderRadius: '12px',
             padding: '24px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -49,7 +49,7 @@ export default function Donate() {
           </div>
 
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            backgroundColor: 'var(--bg-secondary)',
             borderRadius: '12px',
             padding: '24px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -80,7 +80,7 @@ export default function Donate() {
           </div>
 
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            backgroundColor: 'var(--bg-secondary)',
             borderRadius: '12px',
             padding: '24px',
             border: '1px solid rgba(255, 255, 255, 0.1)',

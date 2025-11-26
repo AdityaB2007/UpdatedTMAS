@@ -71,6 +71,7 @@ function Logo() {
         style={{
           transition: 'all 0.3s ease',
           objectFit: 'contain',
+          mixBlendMode: 'lighten',
         }}
         onError={() => setImageError(true)}
       />

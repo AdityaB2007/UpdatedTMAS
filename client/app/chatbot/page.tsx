@@ -10,6 +10,14 @@ interface Message {
   timestamp: Date;
 }
 
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -18,6 +26,8 @@ export default function ChatbotPage() {
   const [authToken, setAuthToken] = useState('');
   const [authError, setAuthError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [chatId, setChatId] = useState('');
+  const [isNewChat, setIsNewChat] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -26,9 +36,15 @@ export default function ChatbotPage() {
     authenticateUser();
   }, []);
 
-  // Scroll to bottom when messages update
+  // Only scroll to bottom when a new assistant message is added (not on user input)
+  const lastMessageRef = useRef<string | null>(null);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const lastMessage = messages[messages.length - 1];
+    // Only auto-scroll if the last message is from assistant and it's a new message
+    if (lastMessage && lastMessage.role === 'assistant' && lastMessage.id !== lastMessageRef.current) {
+      lastMessageRef.current = lastMessage.id;
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   const authenticateUser = async () => {
@@ -75,12 +91,17 @@ export default function ChatbotPage() {
     setInputMessage('');
     setIsLoading(true);
 
+    // Generate chatId for new chat
+    const currentChatId = chatId || generateUUID();
+    if (!chatId) {
+      setChatId(currentChatId);
+    }
+
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_LAMBDA_ENDPOINT || '', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           message: userMessage.content,
@@ -88,11 +109,19 @@ export default function ChatbotPage() {
             role: msg.role,
             content: msg.content,
           })),
+          idToken: authToken,
+          chatId: currentChatId,
+          createNewChat: isNewChat,
         }),
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Mark as no longer new chat after first message
+      if (isNewChat) {
+        setIsNewChat(false);
       }
 
       // Handle streaming response
@@ -102,32 +131,80 @@ export default function ChatbotPage() {
       const assistantMessageId = (Date.now() + 1).toString();
 
       if (reader) {
+        let buffer = '';
+
         while (true) {
           const { done, value } = await reader.read();
 
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          assistantContent += chunk;
+          buffer += chunk;
 
-          // Update or add assistant message
-          setMessages((prev) => {
-            const existingIndex = prev.findIndex((msg) => msg.id === assistantMessageId);
-            const assistantMessage: Message = {
-              id: assistantMessageId,
-              role: 'assistant',
-              content: assistantContent,
-              timestamp: new Date(),
-            };
+          // Try to parse JSON objects from the buffer
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
 
-            if (existingIndex >= 0) {
-              const updated = [...prev];
-              updated[existingIndex] = assistantMessage;
-              return updated;
-            } else {
-              return [...prev, assistantMessage];
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const parsed = JSON.parse(line);
+                if (parsed.content) {
+                  assistantContent = parsed.content;
+
+                  // Update or add assistant message
+                  setMessages((prev) => {
+                    const existingIndex = prev.findIndex((msg) => msg.id === assistantMessageId);
+                    const assistantMessage: Message = {
+                      id: assistantMessageId,
+                      role: 'assistant',
+                      content: assistantContent,
+                      timestamp: new Date(),
+                    };
+
+                    if (existingIndex >= 0) {
+                      const updated = [...prev];
+                      updated[existingIndex] = assistantMessage;
+                      return updated;
+                    } else {
+                      return [...prev, assistantMessage];
+                    }
+                  });
+                }
+              } catch {
+                // Incomplete JSON, continue
+              }
             }
-          });
+          }
+        }
+
+        // Process any remaining buffer
+        if (buffer.trim()) {
+          try {
+            const parsed = JSON.parse(buffer);
+            if (parsed.content) {
+              assistantContent = parsed.content;
+              setMessages((prev) => {
+                const existingIndex = prev.findIndex((msg) => msg.id === assistantMessageId);
+                const assistantMessage: Message = {
+                  id: assistantMessageId,
+                  role: 'assistant',
+                  content: assistantContent,
+                  timestamp: new Date(),
+                };
+
+                if (existingIndex >= 0) {
+                  const updated = [...prev];
+                  updated[existingIndex] = assistantMessage;
+                  return updated;
+                } else {
+                  return [...prev, assistantMessage];
+                }
+              });
+            }
+          } catch {
+            // Ignore parse errors on final buffer
+          }
         }
       } else {
         // Fallback for non-streaming response
@@ -135,7 +212,7 @@ export default function ChatbotPage() {
         const assistantMessage: Message = {
           id: assistantMessageId,
           role: 'assistant',
-          content: data.response || data.message || 'No response received',
+          content: data.content || data.response || data.message || 'No response received',
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, assistantMessage]);

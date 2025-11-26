@@ -229,7 +229,7 @@ export default function Contact() {
               gap: '24px'
             }}>
               <a
-                href="https://discord.gg/UKdzN7Ebsh"
+                href="https://discord.gg/cANVuvFn3x"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

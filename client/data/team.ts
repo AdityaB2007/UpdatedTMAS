@@ -85,7 +85,7 @@ export const allTeamMembers: TeamMember[] = [
   },
   {
     id: "mohnish-chintalapudi",
-    name: "Mohnish Naga Satya Sai Chintalapudi",
+    name: "Mohnish Chintalapudi",
     role: "Academic Writing Intern",
     bio: "Academic writing intern and rising sophomore at Alliance Academy for Innovation. Excited to contribute to academia and research.",
     school: "Alliance Academy for Innovation",

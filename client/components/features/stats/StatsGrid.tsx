@@ -85,14 +85,17 @@ const StatCard: React.FC<StatCardProps> = ({ value, suffix = '', label, accentCo
         textAlign: 'center',
         padding: '32px',
         border: '1px solid var(--glass-border)',
+        borderTop: `3px solid ${accentColor}`,
         borderRadius: '12px',
         backgroundColor: 'var(--bg-secondary)',
         position: 'relative',
+        zIndex: 2,
         transition: 'all 0.3s ease',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = hoverBg;
         e.currentTarget.style.borderColor = accentColor;
+        e.currentTarget.style.borderTopWidth = '3px';
         e.currentTarget.style.boxShadow = `0 8px 30px ${shadowColor}`;
         e.currentTarget.style.transform = 'translateY(-4px)';
         const countElem = e.currentTarget.querySelector('.stat-count') as HTMLElement;
@@ -101,6 +104,8 @@ const StatCard: React.FC<StatCardProps> = ({ value, suffix = '', label, accentCo
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
         e.currentTarget.style.borderColor = 'var(--glass-border)';
+        e.currentTarget.style.borderTopColor = accentColor;
+        e.currentTarget.style.borderTopWidth = '3px';
         e.currentTarget.style.boxShadow = 'none';
         e.currentTarget.style.transform = 'translateY(0)';
         const countElem = e.currentTarget.querySelector('.stat-count') as HTMLElement;

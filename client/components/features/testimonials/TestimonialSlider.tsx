@@ -242,6 +242,7 @@ export default function TestimonialSlider() {
                   flexDirection: 'column',
                   transition: 'all 0.3s ease',
                   position: 'relative',
+                  zIndex: 2,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderLeftColor = colors.hover;

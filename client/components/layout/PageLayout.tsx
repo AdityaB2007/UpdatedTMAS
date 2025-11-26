@@ -10,7 +10,6 @@ export default function PageLayout({
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'var(--bg-primary)',
       paddingTop: '120px',
       paddingBottom: '100px'
     }}>

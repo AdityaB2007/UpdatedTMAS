@@ -42,6 +42,7 @@ export default function BookCard({ book, colorIndex = 0 }: BookCardProps) {
           transition: 'all 0.3s ease',
           cursor: 'pointer',
           position: 'relative',
+          zIndex: 2,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-4px)';
