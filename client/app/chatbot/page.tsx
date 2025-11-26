@@ -29,6 +29,7 @@ export default function ChatbotPage() {
   const [chatId, setChatId] = useState('');
   const [isNewChat, setIsNewChat] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-authenticate on mount
@@ -36,14 +37,24 @@ export default function ChatbotPage() {
     authenticateUser();
   }, []);
 
+  // Scroll to bottom of messages container (internal scroll only)
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  };
+
   // Only scroll to bottom when a new assistant message is added (not on user input)
   const lastMessageRef = useRef<string | null>(null);
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
-    // Only auto-scroll if the last message is from assistant and it's a new message
-    if (lastMessage && lastMessage.role === 'assistant' && lastMessage.id !== lastMessageRef.current) {
+    // Auto-scroll when new message is added or when streaming updates
+    if (lastMessage && lastMessage.id !== lastMessageRef.current) {
       lastMessageRef.current = lastMessage.id;
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      scrollToBottom();
+    } else if (lastMessage && lastMessage.role === 'assistant') {
+      // Also scroll during streaming updates
+      scrollToBottom();
     }
   }, [messages]);
 
@@ -325,10 +336,11 @@ export default function ChatbotPage() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        height: '100vh',
         backgroundColor: 'var(--bg-primary)',
         display: 'flex',
         flexDirection: 'column',
+        overflow: 'hidden',
       }}
     >
       {/* Header */}
@@ -337,10 +349,8 @@ export default function ChatbotPage() {
           background: 'var(--bg-secondary)',
           borderBottom: '1px solid var(--glass-border)',
           padding: '1.5rem 2rem',
-          position: 'sticky',
-          top: 0,
+          flexShrink: 0,
           zIndex: 10,
-          backdropFilter: 'blur(12px)',
         }}
       >
         <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
@@ -371,6 +381,7 @@ export default function ChatbotPage() {
 
       {/* Messages Container */}
       <div
+        ref={messagesContainerRef}
         style={{
           flex: 1,
           overflowY: 'auto',
@@ -518,9 +529,7 @@ export default function ChatbotPage() {
           background: 'var(--bg-secondary)',
           borderTop: '1px solid var(--glass-border)',
           padding: '1.5rem 1rem',
-          position: 'sticky',
-          bottom: 0,
-          backdropFilter: 'blur(12px)',
+          flexShrink: 0,
         }}
       >
         <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
