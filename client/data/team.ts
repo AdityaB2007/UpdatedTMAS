@@ -16,7 +16,7 @@ export const allTeamMembers: TeamMember[] = [
     role: "Founder",
     bio: "Born in 2007, Ritvik is the founder of TMAS Academy. He is the author of the prominent books ACE The AMC 10/12, ACE AP Physics 1, ACE AP Calculus AB, ACE AP Calculus BC, and ACE AP Physics C: Mechanics. He started the program in 2021 and attends Carnegie Mellon University. His interests include physics, math, coding, running, and music.",
     school: "Carnegie Mellon University",
-    department: "Leadership",
+    department: "Founder",
     image: "/ritvik_photos/photo_1.avif"
   },
 
@@ -24,11 +24,11 @@ export const allTeamMembers: TeamMember[] = [
   {
     id: "aditya-baisakh",
     name: "Aditya Baisakh",
-    role: "AP Chemistry Author",
-    bio: "From Baton Rouge, incoming LSU student. Authored the AP Chemistry book and co-wrote the AP Biology book in his senior year. Enjoys martial arts, coding, and piano.",
+    role: "Chief Executive Officer",
+    bio: "From Baton Rouge, current student at LSU. Authored the AP Chemistry book and co-wrote the AP Biology book in his senior year. Currently working on overseeing operations for TMAS Academy. Enjoys martial arts, coding, and piano.",
     school: "Louisiana State University",
-    department: "Published Authors",
-    image: "/team_photos/aditya.jpg"
+    department: "Chief Executive Officer",
+    image: "/team_photos/aditya.png"
   },
   {
     id: "aviva-iyerkhan",
@@ -61,7 +61,7 @@ export const allTeamMembers: TeamMember[] = [
   {
     id: "shreyas-penugonda",
     name: "Shreyas Penugonda",
-    role: "Academic Writer",
+    role: "Academic Writing Intern",
     bio: "Passionate about computer science, coding, problem-solving, and math contests. Enjoys soccer and watching TV in free time.",
     department: "Academic Writing",
     image: "/team_photos/shreyas.jpg"
@@ -69,7 +69,7 @@ export const allTeamMembers: TeamMember[] = [
   {
     id: "shivek-saraf",
     name: "Shivek Saraf",
-    role: "Academic Writer",
+    role: "Academic Writing Intern",
     bio: "Student at McNeil High School. Joined TMAS a year ago to apply AI skills to education, particularly AP Classes. Enjoys automating tasks and solving Rubik's Cubes.",
     school: "McNeil High School",
     department: "Academic Writing",
@@ -78,7 +78,7 @@ export const allTeamMembers: TeamMember[] = [
   {
     id: "mustafa-hameed",
     name: "Mustafa Hameed",
-    role: "Academic Writer",
+    role: "Academic Writing Intern",
     bio: "High school student passionate about education, innovation, and impact. Authored a book on mindset and launched AI projects. Strong in writing, design, and leadership.",
     department: "Academic Writing",
     image: "/team_photos/mustafa.png"
@@ -131,7 +131,7 @@ export const allTeamMembers: TeamMember[] = [
   {
     id: "ziang-zhuang",
     name: "Ziang Zhuang",
-    role: "AMC 8 Book Author / Server Moderator",
+    role: "Academic Writing Intern",
     bio: "TMAS Academy Server Moderator/Admin and author of the AMC 8 Book. Mathematics, physics, and earth science enthusiast. Enjoys swimming and piano.",
     department: "Academic Writing",
     image: "/team_photos/ziang.jpeg"
@@ -139,7 +139,7 @@ export const allTeamMembers: TeamMember[] = [
   {
     id: "pranav-saravanan",
     name: "Pranav Saravanan",
-    role: "Academic Content Creator",
+    role: "Academic Writing Intern",
     bio: "Aspiring innovator passionate about math, finance, and technology. Creates educational content simplifying complex topics. Experience in research, competitions, and coding.",
     department: "Academic Writing",
     image: "/team_photos/pranav.png"
@@ -155,7 +155,7 @@ export const allTeamMembers: TeamMember[] = [
   {
     id: "alisha-fatima",
     name: "Alisha Fatima",
-    role: "Academic Writer",
+    role: "Academic Writing Intern",
     bio: "Academic writer contributing to TMAS Academy's educational content development.",
     department: "Academic Writing",
     image: "/team_photos/alisha.png"
@@ -306,39 +306,66 @@ export const allTeamMembers: TeamMember[] = [
 
   // Software Engineers
   {
-    id: "dhairya",
-    name: "Dhairya",
-    role: "Software Engineer",
+    id: "dhairya-shah",
+    name: "Dhairya Shah",
+    role: "",
     bio: "IB student passionate about building innovative digital experiences that are fast, intuitive, and accessible. Part of DECA, STEM, and coding clubs. Plays guitar.",
-    department: "Software Engineering",
+    department: "Software Engineers",
     image: "/team_photos/dhairya.jpg"
   },
   {
     id: "eric-chen",
     name: "Eric Chen",
-    role: "Software Engineer",
+    role: "",
     bio: "IBDP and AP student from Toronto. Enjoys solving physics problems, programming, taking walks, and trying new foods.",
     school: "Toronto",
-    department: "Software Engineering",
+    department: "Software Engineers",
     image: "/team_photos/eric.png"
   },
   {
     id: "sarvesh-sekar",
     name: "Sarvesh Sekar",
-    role: "Software Engineer",
+    role: "",
     bio: "Incoming systems design engineering student at University of Waterloo. Loves creating interdisciplinary software projects. Passionate environmentalist, researcher, and tech enthusiast.",
     school: "University of Waterloo",
-    department: "Software Engineering",
+    department: "Software Engineers",
     image: "/team_photos/sarvesh.png"
+  },
+  {
+    id: "devesh-mamidi",
+    name: "Devesh Mamidi",
+    role: "",
+    bio: "CS major at UCSB. Experienced in programming full-stack applications with React and Python. Helped develop the chatbot for TMAS Academy during the summer of 2025.",
+    school: "University of California Santa Barbara",
+    department: "Software Engineers",
+    image: "/team_photos/devesh.png"
+  },
+  {
+    id: "aarnav-shah",
+    name: "Aarnav Shah",
+    role: "",
+    bio: "",
+    school: "University of Waterloo",
+    department: "Software Engineers",
+    image: "/team_photos/aarnav.jpg"
+  },
+  {
+    id: "shivek-saraf",
+    name: "Shivek Saraf",
+    role: "",
+    bio: "Incoming systems design engineering student at University of Waterloo. Loves creating interdisciplinary software projects. Passionate environmentalist, researcher, and tech enthusiast.",
+    school: "McNeil High School",
+    department: "Software Engineers",
+    image: "/team_photos/shivek.JPG"
   }
 ];
 
 export const departments = [
-  "Leadership",
-  "Published Authors",
+  "Chief Executive Officer",
+  "Founder",
   "Academic Writing",
   "Marketing",
-  "Software Engineering"
+  "Software Engineers"
 ];
 
 export const getTeamByDepartment = (department: string): TeamMember[] => {
