@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Send, Loader2, Bot, User } from 'lucide-react';
+import { marked } from 'marked';
+
+// Configure marked for safe rendering
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+});
 
 interface Message {
   id: string;
@@ -443,6 +450,7 @@ export default function ChatbotPage() {
                   {/* Message Content */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
+                      className={message.role === 'assistant' ? 'markdown-content' : ''}
                       style={{
                         background:
                           message.role === 'user'
@@ -454,11 +462,16 @@ export default function ChatbotPage() {
                         color: 'var(--text-secondary)',
                         fontSize: '1rem',
                         lineHeight: '1.6',
-                        whiteSpace: 'pre-wrap',
+                        whiteSpace: message.role === 'user' ? 'pre-wrap' : 'normal',
                         wordWrap: 'break-word',
                       }}
+                      dangerouslySetInnerHTML={
+                        message.role === 'assistant'
+                          ? { __html: marked.parse(message.content) as string }
+                          : undefined
+                      }
                     >
-                      {message.content}
+                      {message.role === 'user' ? message.content : null}
                     </div>
                     <div
                       style={{
@@ -606,7 +619,7 @@ export default function ChatbotPage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes spin {
           from {
             transform: rotate(0deg);
@@ -614,6 +627,120 @@ export default function ChatbotPage() {
           to {
             transform: rotate(360deg);
           }
+        }
+
+        /* Markdown content styles */
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3,
+        .markdown-content h4,
+        .markdown-content h5,
+        .markdown-content h6 {
+          color: var(--text-primary);
+          margin-top: 1em;
+          margin-bottom: 0.5em;
+          font-weight: 600;
+        }
+
+        .markdown-content h1 { font-size: 1.5em; }
+        .markdown-content h2 { font-size: 1.3em; }
+        .markdown-content h3 { font-size: 1.1em; }
+
+        .markdown-content p {
+          margin-bottom: 0.75em;
+        }
+
+        .markdown-content p:last-child {
+          margin-bottom: 0;
+        }
+
+        .markdown-content a {
+          color: var(--accent-yellow);
+          text-decoration: underline;
+        }
+
+        .markdown-content a:hover {
+          color: var(--accent-amber);
+        }
+
+        .markdown-content strong {
+          color: var(--text-primary);
+          font-weight: 600;
+        }
+
+        .markdown-content em {
+          font-style: italic;
+        }
+
+        .markdown-content code {
+          background: var(--bg-tertiary);
+          color: var(--accent-yellow);
+          padding: 0.15em 0.4em;
+          border-radius: 4px;
+          font-family: 'Consolas', 'Monaco', monospace;
+          font-size: 0.9em;
+        }
+
+        .markdown-content pre {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--glass-border);
+          border-radius: 8px;
+          padding: 1em;
+          overflow-x: auto;
+          margin: 0.75em 0;
+        }
+
+        .markdown-content pre code {
+          background: transparent;
+          padding: 0;
+          color: var(--text-secondary);
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+          margin: 0.5em 0;
+          padding-left: 1.5em;
+        }
+
+        .markdown-content li {
+          margin-bottom: 0.25em;
+        }
+
+        .markdown-content li::marker {
+          color: var(--accent-yellow);
+        }
+
+        .markdown-content blockquote {
+          border-left: 3px solid var(--accent-yellow);
+          padding-left: 1em;
+          margin: 0.75em 0;
+          color: var(--text-tertiary);
+          font-style: italic;
+        }
+
+        .markdown-content table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 0.75em 0;
+        }
+
+        .markdown-content th,
+        .markdown-content td {
+          border: 1px solid var(--glass-border);
+          padding: 0.5em;
+          text-align: left;
+        }
+
+        .markdown-content th {
+          background: var(--bg-tertiary);
+          color: var(--accent-yellow);
+          font-weight: 600;
+        }
+
+        .markdown-content hr {
+          border: none;
+          border-top: 1px solid var(--glass-border);
+          margin: 1em 0;
         }
       `}</style>
     </div>
