@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 
-// Pages where the hover effect should be disabled
+// Pages where the grid should not be visible
 const DISABLED_PATHS = ['/chatbot', '/books', '/contact'];
 
 export default function GridDistortion() {
@@ -14,8 +14,8 @@ export default function GridDistortion() {
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const rafRef = useRef<number | null>(null);
 
-  // Check if hover effect should be disabled on this page
-  const isHoverDisabled = DISABLED_PATHS.includes(pathname);
+  // Check if grid should be hidden on this page
+  const isGridHidden = DISABLED_PATHS.includes(pathname);
 
   const cellSize = 50;
   const magnifyRadius = 100;
@@ -56,8 +56,6 @@ export default function GridDistortion() {
   }, [isMounted]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isHoverDisabled) return;
-
     // Cancel any pending animation frame
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
@@ -67,7 +65,7 @@ export default function GridDistortion() {
     rafRef.current = requestAnimationFrame(() => {
       setMousePos({ x: e.clientX, y: e.clientY });
     });
-  }, [isHoverDisabled]);
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
     setMousePos({ x: -1000, y: -1000 });
@@ -122,8 +120,8 @@ export default function GridDistortion() {
     return lines;
   }, [isMounted, viewportSize, scrollOffset, mousePos]);
 
-  // Don't render anything until mounted (avoids SSR issues)
-  if (!isMounted) {
+  // Don't render anything until mounted (avoids SSR issues) or on disabled pages
+  if (!isMounted || isGridHidden) {
     return null;
   }
 

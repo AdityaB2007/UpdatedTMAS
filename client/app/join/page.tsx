@@ -1,7 +1,7 @@
 'use client';
 
 import PageLayout from '@/components/layout/PageLayout';
-import { UserPlus, Lightbulb, Globe, GraduationCap } from 'lucide-react';
+import { UserPlus, Lightbulb, Globe, GraduationCap, Award, BookOpen } from 'lucide-react';
 
 export default function Join() {
   const googleFormUrl = process.env.NEXT_PUBLIC_GOOGLE_FORM_URL || 'https://docs.google.com/forms/d/e/1FAIpQLSfrabcJSdi3PbuoEaWwOf11Cj0R3iGDVabqUBjsp8zRxrswAg/viewform';
@@ -29,7 +29,7 @@ export default function Join() {
               style={{
                 width: '40px',
                 height: '40px',
-                color: 'var(--accent-yellow)',
+                color: '#fff800',
                 marginBottom: '16px'
               }}
             />
@@ -59,7 +59,7 @@ export default function Join() {
               style={{
                 width: '40px',
                 height: '40px',
-                color: 'var(--accent-yellow)',
+                color: '#f97316',
                 marginBottom: '16px'
               }}
             />
@@ -89,7 +89,7 @@ export default function Join() {
               style={{
                 width: '40px',
                 height: '40px',
-                color: 'var(--accent-yellow)',
+                color: '#ef4444',
                 marginBottom: '16px'
               }}
             />
@@ -119,7 +119,7 @@ export default function Join() {
               style={{
                 width: '40px',
                 height: '40px',
-                color: 'var(--accent-yellow)',
+                color: '#f59e0b',
                 marginBottom: '16px'
               }}
             />
@@ -136,6 +136,66 @@ export default function Join() {
               color: 'var(--text-secondary)'
             }}>
               Contribute on your own schedule with opportunities in content creation, outreach, and more
+            </p>
+          </div>
+
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            padding: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <Award
+              style={{
+                width: '40px',
+                height: '40px',
+                color: '#eab308',
+                marginBottom: '16px'
+              }}
+            />
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: 'var(--text-primary)',
+              marginBottom: '8px'
+            }}>
+              Build Your Portfolio
+            </h3>
+            <p style={{
+              fontSize: '0.875rem',
+              color: 'var(--text-secondary)'
+            }}>
+              Create published work and gain recognition for your contributions to educational accessibility
+            </p>
+          </div>
+
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            padding: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <BookOpen
+              style={{
+                width: '40px',
+                height: '40px',
+                color: '#ffb800',
+                marginBottom: '16px'
+              }}
+            />
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: 'var(--text-primary)',
+              marginBottom: '8px'
+            }}>
+              Learn & Grow
+            </h3>
+            <p style={{
+              fontSize: '0.875rem',
+              color: 'var(--text-secondary)'
+            }}>
+              Deepen your subject knowledge while teaching others and collaborating with experienced mentors
             </p>
           </div>
         </div>

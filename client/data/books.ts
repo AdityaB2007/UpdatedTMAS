@@ -9,6 +9,7 @@ export interface Book {
   size: string;
   tag?: string;
   pdfPath?: string;
+  coverImage?: string;
 }
 
 export const books: Book[] = [
@@ -29,7 +30,7 @@ export const books: Book[] = [
     problemCount: "300+",
     description: "Competition math strategies, problem-solving techniques, and practice problems for AMC success",
     size: "37 MB",
-    pdfPath: "/pdfs/ACE The AMC 10 and 12.pdf"
+    pdfPath: "/pdfs/ACE_The_AMC_10_and_12.pdf"
   },
   {
     id: "ace-ap-calculus-ab",
@@ -40,7 +41,7 @@ export const books: Book[] = [
     description: "Comprehensive coverage of AP Calculus AB topics with detailed explanations and practice problems",
     size: "29 MB",
     tag: "Popular",
-    pdfPath: "/pdfs/ACE AP Calculus AB.pdf"
+    pdfPath: "/pdfs/ACE_AP_Calculus_AB.pdf"
   },
   {
     id: "ace-ap-calculus-bc",
@@ -51,7 +52,7 @@ export const books: Book[] = [
     description: "Master advanced calculus topics including series, parametric equations, and polar coordinates",
     size: "31 MB",
     tag: "Advanced",
-    pdfPath: "/pdfs/ACE AP Calculus BC.pdf"
+    pdfPath: "/pdfs/ACE_AP_Calculus_BC.pdf"
   },
   {
     id: "ace-ap-physics-1",
@@ -62,7 +63,7 @@ export const books: Book[] = [
     description: "Fundamental physics concepts, problem-solving strategies, and exam preparation techniques",
     size: "28 MB",
     tag: "Essential",
-    pdfPath: "/pdfs/ACE AP Physics 1.pdf"
+    pdfPath: "/pdfs/ACE_AP_Physics_1.pdf"
   },
   {
     id: "ace-ap-physics-c",
@@ -73,7 +74,7 @@ export const books: Book[] = [
     description: "Calculus-based mechanics covering kinematics, dynamics, energy, and momentum",
     size: "31 MB",
     tag: "Advanced",
-    pdfPath: "/pdfs/ACE AP Physics C Mechanics.pdf"
+    pdfPath: "/pdfs/ACE_AP_Physics_C_Mechanics.pdf"
   },
   {
     id: "ace-ap-chemistry",
@@ -95,7 +96,7 @@ export const books: Book[] = [
     description: "Best AP Computer Science Principles study guide with clear explanations and exam-focused practice",
     size: "27 MB",
     tag: "Essential",
-    pdfPath: "/pdfs/ACE AP Computer Science Principles.pdf"
+    pdfPath: "/pdfs/ACE_AP_CSP.pdf"
   },
   {
     id: "ace-ap-statistics",
@@ -107,7 +108,7 @@ export const books: Book[] = [
     description: "Best AP Statistics study guide with comprehensive coverage of statistical concepts and exam preparation",
     size: "32 MB",
     tag: "Essential",
-    pdfPath: "/pdfs/ACE AP Statistics.pdf"
+    pdfPath: "/pdfs/ACE_AP_Stats.pdf"
   },
   {
     id: "ace-ap-biology",

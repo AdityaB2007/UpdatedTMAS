@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import PageLayout from '@/components/layout/PageLayout';
-import { Mail, Send } from 'lucide-react';
+import { Mail, Send, X } from 'lucide-react';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -10,11 +10,11 @@ export default function Contact() {
     email: '',
     message: ''
   });
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Form submission logic can be added here
-    console.log('Form submitted:', formData);
+    setShowPopup(true);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -29,6 +29,137 @@ export default function Contact() {
       title="Get in Touch"
       subtitle="Have questions or want to learn more? We'd love to hear from you."
     >
+      {/* Coming Soon Popup */}
+      {showPopup && (
+        <div
+          onClick={() => setShowPopup(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px',
+            animation: 'fadeIn 0.3s ease'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '16px',
+              padding: '32px',
+              maxWidth: '400px',
+              width: '100%',
+              textAlign: 'center',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
+              animation: 'slideUp 0.3s ease'
+            }}
+          >
+            <button
+              onClick={() => setShowPopup(false)}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'var(--text-secondary)'
+              }}
+            >
+              <X size={16} />
+            </button>
+
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(249, 115, 22, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px'
+            }}>
+              <Mail style={{ width: '28px', height: '28px', color: '#f97316' }} />
+            </div>
+
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+              marginBottom: '12px'
+            }}>
+              Coming Soon!
+            </h3>
+
+            <p style={{
+              fontSize: '1rem',
+              color: 'var(--text-secondary)',
+              marginBottom: '24px',
+              lineHeight: '1.6'
+            }}>
+              Our contact form is under construction. Please reach out via email or our social media channels for now.
+            </p>
+
+            <a
+              href="mailto:tmasacademy@gmail.com"
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#f97316',
+                color: 'white',
+                fontWeight: '600',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#ea580c';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f97316';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              Email Us Instead
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Popup animations */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
+
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Contact Form */}
         <form onSubmit={handleSubmit} style={{ marginBottom: '48px' }}>
@@ -65,8 +196,8 @@ export default function Contact() {
                 transition: 'all 0.3s ease'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'var(--accent-yellow)';
-                e.target.style.boxShadow = '0 0 0 2px rgba(250, 204, 21, 0.2)';
+                e.target.style.borderColor = '#f97316';
+                e.target.style.boxShadow = '0 0 0 2px rgba(249, 115, 22, 0.2)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -108,8 +239,8 @@ export default function Contact() {
                 transition: 'all 0.3s ease'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'var(--accent-yellow)';
-                e.target.style.boxShadow = '0 0 0 2px rgba(250, 204, 21, 0.2)';
+                e.target.style.borderColor = '#ef4444';
+                e.target.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -152,8 +283,8 @@ export default function Contact() {
                 resize: 'none'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'var(--accent-yellow)';
-                e.target.style.boxShadow = '0 0 0 2px rgba(250, 204, 21, 0.2)';
+                e.target.style.borderColor = '#f59e0b';
+                e.target.style.boxShadow = '0 0 0 2px rgba(245, 158, 11, 0.2)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -166,7 +297,7 @@ export default function Contact() {
             type="submit"
             style={{
               width: '100%',
-              backgroundColor: 'var(--accent-yellow)',
+              backgroundColor: '#fff800',
               color: 'var(--bg-primary)',
               fontWeight: '600',
               padding: '12px 24px',
@@ -181,9 +312,13 @@ export default function Contact() {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#eab308';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 248, 0, 0.3)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--accent-yellow)';
+              e.currentTarget.style.backgroundColor = '#fff800';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             <Send className="w-5 h-5" />

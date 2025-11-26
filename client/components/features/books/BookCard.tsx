@@ -4,6 +4,25 @@ import React from 'react';
 import Link from 'next/link';
 import { Book } from '@/data/books';
 import { BookOpen } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import PdfCover to avoid SSR issues
+const PdfCover = dynamic(() => import('./PdfCover'), {
+  ssr: false,
+  loading: () => (
+    <div style={{
+      width: '80px',
+      height: '104px',
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: '4px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <BookOpen style={{ width: '24px', height: '24px', color: 'var(--text-secondary)' }} />
+    </div>
+  )
+});
 
 interface BookCardProps {
   book: Book;
@@ -20,6 +39,8 @@ const warmColors = [
 
 export default function BookCard({ book, colorIndex = 0 }: BookCardProps) {
   const colors = warmColors[colorIndex % warmColors.length];
+  const hasPdf = !!book.pdfPath;
+
   return (
     <Link
       href="/resources"
@@ -33,8 +54,9 @@ export default function BookCard({ book, colorIndex = 0 }: BookCardProps) {
         style={{
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          padding: '24px',
+          flexDirection: 'row',
+          gap: '16px',
+          padding: '20px',
           borderRadius: '8px',
           border: '1px solid var(--glass-border)',
           borderTop: `2px solid ${colors.border}`,
@@ -61,21 +83,47 @@ export default function BookCard({ book, colorIndex = 0 }: BookCardProps) {
           if (icon) icon.style.color = 'var(--text-secondary)';
         }}
       >
-        {/* Small Book Icon */}
-        <div style={{ marginBottom: '16px' }}>
-          <BookOpen
-            className="book-icon"
-            style={{
-              width: '32px',
-              height: '32px',
-              color: 'var(--text-secondary)',
-              transition: 'color 0.3s ease',
-            }}
-          />
+        {/* PDF Cover or Book Icon */}
+        <div style={{
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'flex-start'
+        }}>
+          {hasPdf ? (
+            <div style={{
+              borderRadius: '4px',
+              overflow: 'hidden',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <PdfCover pdfPath={book.pdfPath!} width={80} height={104} />
+            </div>
+          ) : (
+            <div style={{
+              width: '80px',
+              height: '104px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <BookOpen
+                className="book-icon"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  color: 'var(--text-secondary)',
+                  transition: 'color 0.3s ease',
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Book Content */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <h3
             style={{
               fontSize: '18px',
@@ -96,6 +144,22 @@ export default function BookCard({ book, colorIndex = 0 }: BookCardProps) {
           >
             by {book.authors ? book.authors.join(', ') : book.author}
           </p>
+
+          {book.tag && (
+            <span style={{
+              display: 'inline-block',
+              marginTop: '8px',
+              fontSize: '11px',
+              fontWeight: '500',
+              color: colors.icon,
+              backgroundColor: `${colors.icon}15`,
+              padding: '4px 8px',
+              borderRadius: '4px',
+              width: 'fit-content'
+            }}>
+              {book.tag}
+            </span>
+          )}
         </div>
       </div>
     </Link>

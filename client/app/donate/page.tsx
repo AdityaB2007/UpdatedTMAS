@@ -28,7 +28,7 @@ export default function Donate() {
               style={{
                 width: '48px',
                 height: '48px',
-                color: 'var(--accent-yellow)',
+                color: '#f97316',
                 margin: '0 auto 16px'
               }}
             />
@@ -59,7 +59,7 @@ export default function Donate() {
               style={{
                 width: '48px',
                 height: '48px',
-                color: 'var(--accent-yellow)',
+                color: '#ef4444',
                 margin: '0 auto 16px'
               }}
             />
@@ -90,7 +90,7 @@ export default function Donate() {
               style={{
                 width: '48px',
                 height: '48px',
-                color: 'var(--accent-yellow)',
+                color: '#f59e0b',
                 margin: '0 auto 16px'
               }}
             />
@@ -142,7 +142,7 @@ export default function Donate() {
               rel="noopener noreferrer"
               style={{
                 display: 'inline-block',
-                backgroundColor: 'var(--accent-yellow)',
+                backgroundColor: '#fff800',
                 color: 'var(--bg-primary)',
                 fontWeight: '600',
                 padding: '12px 32px',
@@ -151,8 +151,16 @@ export default function Donate() {
                 transition: 'all 0.3s ease',
                 marginBottom: '16px'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eab308'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--accent-yellow)'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#eab308';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 248, 0, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#fff800';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
               Support Us on Buy Me A Coffee
             </a>

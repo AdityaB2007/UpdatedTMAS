@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import StatsGrid from '@/components/features/stats/StatsGrid';
 import TestimonialSlider from '@/components/features/testimonials/TestimonialSlider';
 import HeroSection from '@/components/features/hero/HeroSection';
-import BookGrid from '@/components/features/books/BookGrid';
+import BookCarousel from '@/components/features/books/BookCarousel';
 import { books } from '@/data/books';
 
 export default function HomePage() {
@@ -46,9 +46,9 @@ export default function HomePage() {
 
       {/* Our Resources Section */}
       <section style={{
-        padding: '80px 24px'
+        padding: '80px 0'
       }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h2 style={{
               fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
@@ -67,10 +67,10 @@ export default function HomePage() {
               Free, comprehensive study guides for AP courses and competitive math
             </p>
           </div>
-
-          {/* Book Grid - First 3 Books */}
-          <BookGrid books={books} limit={3} />
         </div>
+
+        {/* Book Carousel - Full Width */}
+        <BookCarousel books={books} />
       </section>
 
       {/* Testimonials Section */}

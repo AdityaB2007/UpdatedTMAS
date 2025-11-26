@@ -11,6 +11,7 @@ TMAS Academy is a student-led nonprofit organization dedicated to making high-qu
 - **Community** - Join 500+ students on Discord
 - **AI Chatbot** - Get help with your studies (coming soon)
 - **Modern UI** - Dark theme with smooth GSAP animations
+- **Interactive Grid Effect** - Dynamic hover highlights with scroll-aligned grid magnification
 
 ## Tech Stack
 
@@ -67,6 +68,7 @@ client/
 │   ├── join/              # Volunteer signup
 │   └── chatbot/           # AI assistant
 ├── components/
+│   ├── effects/           # Visual effects (GridDistortion)
 │   ├── features/          # Feature components
 │   ├── layout/            # Layout components
 │   └── navigation/        # Navigation components
