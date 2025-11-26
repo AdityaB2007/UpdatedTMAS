@@ -62,7 +62,6 @@ export const books: Book[] = [
     problemCount: "180+",
     description: "Fundamental physics concepts, problem-solving strategies, and exam preparation techniques",
     size: "28 MB",
-    tag: "Essential",
     pdfPath: "/pdfs/ACE_AP_Physics_1.pdf"
   },
   {
@@ -83,19 +82,17 @@ export const books: Book[] = [
     pageCount: "400+",
     problemCount: "100+",
     description: "Thorough review of AP Chemistry topics, including practice problems and exam strategies",
-    size: "38 MB",
-    tag: "Comprehensive"
+    size: "38 MB"
   },
   {
     id: "ace-ap-csp",
     title: "ACE AP Computer Science Principles",
-    author: "Ipsaan Sedhai, Aviva Iykehan",
-    authors: ["Ipsaan Sedhai", "Aviva Iykehan"],
+    author: "Ipsaan Sedhai, Aviva Iyerkhan",
+    authors: ["Ipsaan Sedhai", "Aviva Iyerkhan"],
     pageCount: "100+",
     problemCount: "100+",
     description: "Best AP Computer Science Principles study guide with clear explanations and exam-focused practice",
     size: "27 MB",
-    tag: "Essential",
     pdfPath: "/pdfs/ACE_AP_CSP.pdf"
   },
   {
@@ -107,7 +104,6 @@ export const books: Book[] = [
     problemCount: "100+",
     description: "Best AP Statistics study guide with comprehensive coverage of statistical concepts and exam preparation",
     size: "32 MB",
-    tag: "Essential",
     pdfPath: "/pdfs/ACE_AP_Stats.pdf"
   },
   {
@@ -118,8 +114,7 @@ export const books: Book[] = [
     pageCount: "300+",
     problemCount: "100+",
     description: "Comprehensive coverage of AP Biology topics with detailed explanations and practice problems",
-    size: "35 MB",
-    tag: "New"
+    size: "35 MB"
   }
 ];
 
