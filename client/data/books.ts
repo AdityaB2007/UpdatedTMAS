@@ -6,21 +6,18 @@ export interface Book {
   pageCount: string;
   problemCount: string;
   description: string;
-  size: string;
-  tag?: string;
   pdfPath?: string;
-  coverImage?: string;
+  // coverImage?: string;
 }
 
 export const books: Book[] = [
   {
     id: "amc-10-12-key",
-    title: "AMC 10/12 Key",
+    title: "AMC 10/12 Key Fundamentals and Strategies",
     author: "Ritvik Rustagi",
     pageCount: "25+",
     problemCount: "50+",
     description: "Quick reference guide with essential formulas, strategies, and tips for AMC competitions",
-    size: "2.4 MB"
   },
   {
     id: "ace-amc-10-12",
@@ -29,7 +26,6 @@ export const books: Book[] = [
     pageCount: "350+",
     problemCount: "300+",
     description: "Competition math strategies, problem-solving techniques, and practice problems for AMC success",
-    size: "37 MB",
     pdfPath: "/pdfs/ACE_The_AMC_10_and_12.pdf"
   },
   {
@@ -39,8 +35,6 @@ export const books: Book[] = [
     pageCount: "280+",
     problemCount: "150+",
     description: "Comprehensive coverage of AP Calculus AB topics with detailed explanations and practice problems",
-    size: "29 MB",
-    tag: "Popular",
     pdfPath: "/pdfs/ACE_AP_Calculus_AB.pdf"
   },
   {
@@ -50,8 +44,6 @@ export const books: Book[] = [
     pageCount: "300+",
     problemCount: "200+",
     description: "Master advanced calculus topics including series, parametric equations, and polar coordinates",
-    size: "31 MB",
-    tag: "Advanced",
     pdfPath: "/pdfs/ACE_AP_Calculus_BC.pdf"
   },
   {
@@ -61,7 +53,6 @@ export const books: Book[] = [
     pageCount: "270+",
     problemCount: "180+",
     description: "Fundamental physics concepts, problem-solving strategies, and exam preparation techniques",
-    size: "28 MB",
     pdfPath: "/pdfs/ACE_AP_Physics_1.pdf"
   },
   {
@@ -71,8 +62,6 @@ export const books: Book[] = [
     pageCount: "300+",
     problemCount: "160+",
     description: "Calculus-based mechanics covering kinematics, dynamics, energy, and momentum",
-    size: "31 MB",
-    tag: "Advanced",
     pdfPath: "/pdfs/ACE_AP_Physics_C_Mechanics.pdf"
   },
   {
@@ -82,7 +71,7 @@ export const books: Book[] = [
     pageCount: "400+",
     problemCount: "100+",
     description: "Thorough review of AP Chemistry topics, including practice problems and exam strategies",
-    size: "38 MB"
+    pdfPath: "/pdfs/ACE_AP_Chemistry.pdf"
   },
   {
     id: "ace-ap-csp",
@@ -92,7 +81,6 @@ export const books: Book[] = [
     pageCount: "100+",
     problemCount: "100+",
     description: "Best AP Computer Science Principles study guide with clear explanations and exam-focused practice",
-    size: "27 MB",
     pdfPath: "/pdfs/ACE_AP_CSP.pdf"
   },
   {
@@ -103,7 +91,6 @@ export const books: Book[] = [
     pageCount: "200+",
     problemCount: "100+",
     description: "Best AP Statistics study guide with comprehensive coverage of statistical concepts and exam preparation",
-    size: "32 MB",
     pdfPath: "/pdfs/ACE_AP_Stats.pdf"
   },
   {
@@ -114,7 +101,27 @@ export const books: Book[] = [
     pageCount: "300+",
     problemCount: "100+",
     description: "Comprehensive coverage of AP Biology topics with detailed explanations and practice problems",
-    size: "35 MB"
+    pdfPath: "/pdfs/ACE_AP_Biology.pdf"
+  },
+  {
+    id: "ace-ap-psychology",
+    title: "ACE AP Psychology",
+    author: "Sricharan Pullela, Shivek Saraf",
+    authors: ["Sricharan Pullela", "Shivek Saraf"],
+    pageCount: "300+",
+    problemCount: "100+",
+    description: "Comprehensive coverage of AP Biology topics with detailed explanations and practice problems",
+    pdfPath: "/pdfs/ACE_AP_Psychology.pdf"
+  },
+  {
+    id: "ace-ap-human-geography",
+    title: "ACE AP Human Geography",
+    author: "Shivek Saraf",
+    authors: ["Shivek Saraf"],
+    pageCount: "300+",
+    problemCount: "100+",
+    description: "Comprehensive coverage of AP Biology topics with detailed explanations and practice problems",
+    pdfPath: "/pdfs/ACE_AP_Human_Geography.pdf"
   }
 ];
 
@@ -122,9 +129,11 @@ export const getBookById = (id: string): Book | undefined => {
   return books.find(book => book.id === id);
 };
 
+/*
 export const getBooksByTag = (tag: string): Book[] => {
   return books.filter(book => book.tag === tag);
 };
+*/
 
 export const getBooksByAuthor = (authorName: string): Book[] => {
   return books.filter(book =>
