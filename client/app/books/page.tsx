@@ -16,18 +16,19 @@ const availablePdfs = [
 ];
 
 export default function BooksPage() {
-  const [selectedPdf, setSelectedPdf] = useState<string>('');
+  const [selectedPdf, setSelectedPdf] = useState('');
 
   return (
-    <div className="min-h-screen bg-primary pt-28 md:pt-40 pb-24">
-      <div className="max-w-7xl mx-auto px-4 space-y-8">
-        {/* keep the heading + selector always visible below the fixed navbar */}
-        <div className="sticky top-20 z-20 bg-primary/60 backdrop-blur-sm -mx-4 md:mx-0 px-4 py-6 md:rounded-lg md:bg-transparent md:backdrop-blur-0">
-          <h1 className="text-4xl font-bold text-white text-center">Browse Books</h1>
-
-          <div className="space-y-6 mt-6 md:mt-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      <div className="container mx-auto px-4 py-8">
+        {/* header + selector — keep this small and sticky under the nav so it remains visible */}
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-4 mb-4 border-b border-glass-border">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Browse Books
+          </h1>
+          
           <select
-            className="w-full bg-secondary border border-glass-border px-4 py-3 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all cursor-pointer"
+            className="w-full max-w-md px-4 py-2 bg-secondary/50 border border-glass-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             value={selectedPdf}
             onChange={(e) => setSelectedPdf(e.target.value)}
           >
@@ -39,18 +40,30 @@ export default function BooksPage() {
             ))}
           </select>
 
+          {/* show current selection clearly so users know what is chosen */}
+          {selectedPdf ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Selected: {availablePdfs.find(p => p.url === selectedPdf)?.name}
+            </p>
+          ) : null}
+        </div>
+
+        {/* spacer to reserve space for the sticky header so it doesn't overlap the viewer */}
+        <div className="h-8"></div>
+
+        {/* viewer — outside of the sticky so the header doesn't get pushed around */}
+        <div className="w-full">
           {selectedPdf ? (
             <iframe
               src={selectedPdf}
-              className="w-full h-[70vh] md:h-[700px] border border-glass-border rounded-lg"
+              className="w-full h-[60vh] md:h-[700px] border border-glass-border rounded-lg shadow-lg"
               title="PDF Viewer"
             />
           ) : (
             <div className="w-full h-[60vh] md:h-[700px] border border-glass-border rounded-lg flex items-center justify-center bg-secondary/50">
-              <p className="text-gray-400 text-lg">Select a book from the dropdown to start reading</p>
+              <p className="text-gray-400 text-lg">Select a book from the dropdown bar to start reading!</p>
             </div>
           )}
-          </div>
         </div>
       </div>
     </div>
