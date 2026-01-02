@@ -48,7 +48,7 @@ export default function BooksPage() {
           ) : null}
         </div>
 
-        {/* spacer to reserve space for the sticky header so it doesn't overlap the viewer */}
+        {/* spacer to reserve space for sticky header so it doesn't overlap the viewer */}
         <div className="h-8"></div>
 
         {/* viewer — outside of the sticky so the header doesn't get pushed around */}
