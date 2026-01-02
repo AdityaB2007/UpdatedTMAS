@@ -116,7 +116,7 @@ export default function Contact() {
             </p>
 
             <a
-              href="mailto:tmasacademy@gmail.com"
+              href="mailto:weexploremath@gmail.com"
               style={{
                 display: 'inline-block',
                 backgroundColor: '#f97316',
@@ -337,7 +337,7 @@ export default function Contact() {
             <Mail className="w-8 h-8 text-yellow-500 mx-auto mb-3" style={{ color: 'var(--accent-yellow)', margin: '0 auto 12px' }} />
             <p style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Or reach out directly at:</p>
             <a
-              href="mailto:tmasacademy@gmail.com"
+              href="mailto:weexploremath@gmail.com"
               style={{
                 fontSize: '1.25rem',
                 fontWeight: '600',
@@ -348,7 +348,7 @@ export default function Contact() {
               onMouseEnter={(e) => e.currentTarget.style.color = '#eab308'}
               onMouseLeave={(e) => e.currentTarget.style.color = 'var(--accent-yellow)'}
             >
-              tmasacademy@gmail.com
+              weexploremath@gmail.com
             </a>
           </div>
 
