@@ -123,7 +123,7 @@ To join the team, visit [tmasacademy.org/join](https://tmasacademy.org/join) or 
 - **Discord**: [Join our server](https://discord.gg/UKdzN7Ebsh)
 - **Instagram**: [@tmasacademy](https://instagram.com/tmasacademy)
 - **LinkedIn**: [TMAS Academy](https://linkedin.com/company/tmas-academy)
-- **Email**: tmasacademy@gmail.com
+- **Email**: weexploremath@gmail.com
 
 ## License
 
