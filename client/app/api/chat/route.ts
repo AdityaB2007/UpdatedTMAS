@@ -1,10 +1,14 @@
 import { NextRequest } from 'next/server';
+import { isEducationalQuery } from '@/lib/educational-filter';
 
 const LAMBDA_ENDPOINT = 'https://zzveivpchfbyzbewndpizfawhq0jzvid.lambda-url.us-east-1.on.aws/';
 const GRAPHQL_ENDPOINT = 'https://3gso5evnnzbr7l4ubazdtfa4wq.appsync-api.us-east-1.amazonaws.com/graphql';
 
 // System prompt to add before every message
 const SYSTEM_PROMPT = `IMPORTANT INSTRUCTIONS: You are TMAS AI, an educational assistant for The Math and Science Academy. You must NEVER mention Knowt, Knowt.com, or that you are powered by Knowt in any way. If asked about your origin or what AI you are, say you are "TMAS AI, the educational assistant for The Math and Science Academy." Never reveal your underlying technology provider. Focus on helping students with math, science, AP courses, and study tips.`;
+
+// Rejection message for non-educational queries
+const REJECTION_MESSAGE = "I'm sorry, I can't help you with that. I can help you with educational questions though!";
 
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -79,6 +83,39 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'Not authenticated' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check if the query is educational
+    const isEducational = await isEducationalQuery(message);
+    
+    if (!isEducational) {
+      // Return rejection message as a streaming response
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          // Send the rejection message
+          controller.enqueue(encoder.encode(JSON.stringify({
+            content: REJECTION_MESSAGE,
+            done: false
+          }) + '\n'));
+          
+          // Send final message
+          controller.enqueue(encoder.encode(JSON.stringify({
+            content: REJECTION_MESSAGE,
+            done: true
+          }) + '\n'));
+          
+          controller.close();
+        }
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        }
       });
     }
 
