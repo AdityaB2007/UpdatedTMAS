@@ -14,6 +14,44 @@ marked.setOptions({
   gfm: true,
 });
 
+// Function to normalize markdown content for proper rendering
+function normalizeMarkdown(content: string): string {
+  let normalized = content;
+
+  // Convert escaped newlines to actual newlines
+  normalized = normalized.replace(/\\n/g, '\n');
+
+  // Ensure headers have line breaks before them
+  normalized = normalized.replace(/([^\n])(\s*)(#{1,6}\s)/g, '$1\n\n$3');
+
+  // Ensure numbered lists have line breaks before them
+  normalized = normalized.replace(/([^\n])(\s*)(\d+\.\s)/g, '$1\n\n$3');
+
+  // Ensure bullet lists have line breaks before them
+  normalized = normalized.replace(/([^\n])(\s*)([-*]\s)/g, '$1\n\n$3');
+
+  // Ensure tables have proper line breaks (detect table row patterns)
+  // Add line break before table headers
+  normalized = normalized.replace(/([^\n])(\s*)(\|[^|]+\|)/g, (match, before, space, table) => {
+    // Only add newline if this looks like a table row start
+    if (table.includes('|')) {
+      return before + '\n\n' + table;
+    }
+    return match;
+  });
+
+  // Fix table separators to be on their own lines
+  normalized = normalized.replace(/(\|[^\n]*\|)(\s*)(\|[-:\s|]+\|)/g, '$1\n$3');
+
+  // Ensure there's a line break after table separator rows
+  normalized = normalized.replace(/(\|[-:\s|]+\|)(\s*)(\|)/g, '$1\n$3');
+
+  // Clean up excessive newlines (more than 2 in a row)
+  normalized = normalized.replace(/\n{3,}/g, '\n\n');
+
+  return normalized.trim();
+}
+
 // Function to escape HTML to prevent XSS
 function escapeHtml(text: string): string {
   const div = document.createElement('div');
@@ -33,56 +71,82 @@ function renderMath(content: string, isHtml: boolean = false): string {
   // Decode HTML entities first (content from API may have encoded entities like &#39;)
   // This ensures entities like &#39; are converted to ' before processing
   let decodedContent = decodeHtmlEntities(content);
-  
+
   // If content is already HTML (from markdown), use decoded content as-is
   // If it's plain text, we still need to escape HTML tags for security,
   // but entities are already decoded so they'll display correctly
   let processedContent = isHtml ? decodedContent : escapeHtml(decodedContent);
-  
+
+  // Helper function to clean math content
+  const cleanMathContent = (math: string): string => {
+    return math
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&#39;/g, "'")
+      .replace(/<\/?p>/g, '')
+      .replace(/<br\s*\/?>/g, '')
+      .replace(/<\/?em>/g, '')
+      .replace(/<\/?strong>/g, '');
+  };
+
   // Render block math ($$...$$) - non-greedy match to handle multiple blocks
   processedContent = processedContent.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
     try {
       const trimmed = math.trim();
       if (trimmed.length === 0) return match;
-      // Decode HTML entities if present (double-check for any remaining)
-      const decoded = trimmed
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'")
-        .replace(/&#39;/g, "'");
+      const decoded = cleanMathContent(trimmed);
       return katex.renderToString(decoded, { displayMode: true, throwOnError: false });
     } catch (e) {
       console.warn('KaTeX rendering error for block math:', e);
       return match;
     }
   });
-  
-  // Render inline math ($...$) - avoid matching block math
-  // Match $...$ but not $$...$$
-  // Updated regex to allow more characters including backslashes for LaTeX commands
-  processedContent = processedContent.replace(/(?<!\$)\$([^\$\n]+?)\$(?!\$)/g, (match, math) => {
+
+  // Handle \[ \] for display math (common LaTeX notation)
+  processedContent = processedContent.replace(/\\\[([\s\S]*?)\\\]/g, (match, math) => {
     try {
       const trimmed = math.trim();
       if (trimmed.length === 0) return match;
-      // Skip if it looks like HTML tag content
-      if (trimmed.match(/^<|>$/)) return match;
-      // Decode HTML entities if present (double-check for any remaining)
-      const decoded = trimmed
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'")
-        .replace(/&#39;/g, "'");
+      const decoded = cleanMathContent(trimmed);
+      return katex.renderToString(decoded, { displayMode: true, throwOnError: false });
+    } catch (e) {
+      console.warn('KaTeX rendering error for \\[ \\] math:', e);
+      return match;
+    }
+  });
+
+  // Render inline math ($...$) - avoid matching block math
+  // Match $...$ but not $$...$$
+  processedContent = processedContent.replace(/(?<!\$)\$(?!\$)([^$\n]+?)\$(?!\$)/g, (match, math) => {
+    try {
+      const trimmed = math.trim();
+      if (trimmed.length === 0) return match;
+      // Skip if it looks like HTML tag content or currency
+      if (trimmed.match(/^<|>$/) || trimmed.match(/^\d+,?\d*$/)) return match;
+      const decoded = cleanMathContent(trimmed);
       return katex.renderToString(decoded, { displayMode: false, throwOnError: false });
     } catch (e) {
       console.warn('KaTeX rendering error for inline math:', e);
       return match;
     }
   });
-  
+
+  // Handle \( \) for inline math (common LaTeX notation)
+  processedContent = processedContent.replace(/\\\((.+?)\\\)/g, (match, math) => {
+    try {
+      const trimmed = math.trim();
+      if (trimmed.length === 0) return match;
+      const decoded = cleanMathContent(trimmed);
+      return katex.renderToString(decoded, { displayMode: false, throwOnError: false });
+    } catch (e) {
+      console.warn('KaTeX rendering error for \\( \\) math:', e);
+      return match;
+    }
+  });
+
   return processedContent;
 }
 
@@ -756,7 +820,7 @@ export default function ChatbotPage() {
                       }}
                       dangerouslySetInnerHTML={
                         message.role === 'assistant'
-                          ? { __html: renderMath(marked.parse(message.content) as string, true) }
+                          ? { __html: renderMath(marked.parse(normalizeMarkdown(message.content)) as string, true) }
                           : undefined
                       }
                     >

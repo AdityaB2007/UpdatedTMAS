@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 
 // Pages where the grid should not be visible
-const DISABLED_PATHS = ['/chatbot', '/books', '/contact'];
+const DISABLED_PATHS = ['/chatbot', '/books', '/contact', '/resources'];
 
 export default function GridDistortion() {
   const pathname = usePathname();
