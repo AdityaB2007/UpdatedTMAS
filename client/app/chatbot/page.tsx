@@ -91,6 +91,12 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  // Special content types that become part of message history
+  quizData?: QuizState;
+  booksData?: {
+    books: Book[];
+    topics: Array<{ topic: string; relevance: number; description: string }>;
+  };
 }
 
 interface QuizQuestion {
@@ -370,12 +376,12 @@ export default function ChatbotPage() {
 
   const handleRecommendBooks = async () => {
     if (!isAuthenticated || isLoadingBooks) return;
-    
+
     setIsLoadingBooks(true);
     try {
       const lastUserMessage = messages.filter(m => m.role === 'user').pop();
       const userQuery = lastUserMessage?.content || '';
-      
+
       const response = await fetch('/api/recommend-books', {
         method: 'POST',
         headers: {
@@ -393,11 +399,19 @@ export default function ChatbotPage() {
       });
 
       const data = await response.json();
-      if (data.books) {
-        setRecommendedBooks(data.books);
-      }
-      if (data.topics) {
-        setTopics(data.topics);
+      if (data.books || data.topics) {
+        // Add books recommendation as a message so it scrolls with chat
+        const booksMessage: Message = {
+          id: `books-${Date.now()}`,
+          role: 'assistant',
+          content: 'Here are some recommended books based on our conversation:',
+          timestamp: new Date(),
+          booksData: {
+            books: data.books || [],
+            topics: data.topics || [],
+          },
+        };
+        setMessages(prev => [...prev, booksMessage]);
       }
     } catch (error) {
       console.error('Error fetching book recommendations:', error);
@@ -448,7 +462,7 @@ export default function ChatbotPage() {
 
   const handleGenerateQuiz = async () => {
     if (!isAuthenticated || isLoadingQuiz || !lastAiResponse) return;
-    
+
     setIsLoadingQuiz(true);
     try {
       const response = await fetch('/api/generate-quiz', {
@@ -465,12 +479,20 @@ export default function ChatbotPage() {
 
       const data = await response.json();
       if (data.questions && Array.isArray(data.questions) && data.questions.length === 3) {
-        setQuizState({
-          questions: data.questions,
-          userAnswers: [null, null, null],
-          showHints: [false, false, false],
-          showResults: [false, false, false],
-        });
+        // Add quiz as a message so it scrolls with chat
+        const quizMessage: Message = {
+          id: `quiz-${Date.now()}`,
+          role: 'assistant',
+          content: 'Test your knowledge with this quiz:',
+          timestamp: new Date(),
+          quizData: {
+            questions: data.questions,
+            userAnswers: [null, null, null],
+            showHints: [false, false, false],
+            showResults: [false, false, false],
+          },
+        };
+        setMessages(prev => [...prev, quizMessage]);
       }
     } catch (error) {
       console.error('Error generating quiz:', error);
@@ -479,32 +501,42 @@ export default function ChatbotPage() {
     }
   };
 
-  const handleQuizAnswer = (questionIndex: number, answerIndex: number) => {
-    if (!quizState) return;
-    
-    const newAnswers = [...quizState.userAnswers];
-    newAnswers[questionIndex] = answerIndex;
-    
-    const newResults = [...quizState.showResults];
-    newResults[questionIndex] = true;
-    
-    setQuizState({
-      ...quizState,
-      userAnswers: newAnswers,
-      showResults: newResults,
-    });
+  const handleQuizAnswer = (messageId: string, questionIndex: number, answerIndex: number) => {
+    setMessages(prev => prev.map(msg => {
+      if (msg.id !== messageId || !msg.quizData) return msg;
+
+      const newAnswers = [...msg.quizData.userAnswers];
+      newAnswers[questionIndex] = answerIndex;
+
+      const newResults = [...msg.quizData.showResults];
+      newResults[questionIndex] = true;
+
+      return {
+        ...msg,
+        quizData: {
+          ...msg.quizData,
+          userAnswers: newAnswers,
+          showResults: newResults,
+        },
+      };
+    }));
   };
 
-  const toggleHint = (questionIndex: number) => {
-    if (!quizState) return;
-    
-    const newHints = [...quizState.showHints];
-    newHints[questionIndex] = !newHints[questionIndex];
-    
-    setQuizState({
-      ...quizState,
-      showHints: newHints,
-    });
+  const toggleHint = (messageId: string, questionIndex: number) => {
+    setMessages(prev => prev.map(msg => {
+      if (msg.id !== messageId || !msg.quizData) return msg;
+
+      const newHints = [...msg.quizData.showHints];
+      newHints[questionIndex] = !newHints[questionIndex];
+
+      return {
+        ...msg,
+        quizData: {
+          ...msg.quizData,
+          showHints: newHints,
+        },
+      };
+    }));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -834,428 +866,300 @@ export default function ChatbotPage() {
                         </button>
                       </div>
                     )}
+
+                    {/* Inline Books Data */}
+                    {message.booksData && (
+                      <>
+                        {/* Topics */}
+                        {message.booksData.topics.length > 0 && (
+                          <div
+                            style={{
+                              background: 'var(--bg-secondary)',
+                              border: '1px solid var(--glass-border)',
+                              borderRadius: '0.75rem',
+                              padding: '1.25rem',
+                              marginTop: '1rem',
+                            }}
+                          >
+                            <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <Lightbulb size={18} style={{ color: 'var(--accent-yellow)' }} />
+                              Relevant Topics
+                            </h4>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              {message.booksData.topics.map((topic, index) => (
+                                <div
+                                  key={index}
+                                  style={{
+                                    background: 'var(--bg-tertiary)',
+                                    border: '1px solid var(--glass-border)',
+                                    borderRadius: '0.375rem',
+                                    padding: '0.375rem 0.625rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                  }}
+                                >
+                                  <span style={{ color: 'var(--text-primary)', fontSize: '0.8125rem', fontWeight: 500 }}>
+                                    {topic.topic}
+                                  </span>
+                                  <span style={{ color: 'var(--accent-yellow)', fontSize: '0.75rem', fontWeight: 500 }}>
+                                    {Math.round(topic.relevance * 100)}%
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {/* Books */}
+                        {message.booksData.books.length > 0 && (
+                          <div
+                            style={{
+                              background: 'var(--bg-secondary)',
+                              border: '1px solid var(--glass-border)',
+                              borderRadius: '0.75rem',
+                              padding: '1.25rem',
+                              marginTop: '0.75rem',
+                            }}
+                          >
+                            <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <BookOpen size={18} style={{ color: 'var(--accent-yellow)' }} />
+                              Recommended Books
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                              {message.booksData.books.map((book) => (
+                                <Link
+                                  key={book.id}
+                                  href={`/resources?book=${book.id}`}
+                                  style={{ textDecoration: 'none', color: 'inherit' }}
+                                >
+                                  <div
+                                    style={{
+                                      background: 'var(--bg-tertiary)',
+                                      border: '1px solid var(--glass-border)',
+                                      borderRadius: '0.5rem',
+                                      padding: '0.875rem',
+                                      transition: 'all 0.2s',
+                                      cursor: 'pointer',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.borderColor = 'var(--accent-yellow)';
+                                      e.currentTarget.style.transform = 'translateX(4px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.borderColor = 'var(--glass-border)';
+                                      e.currentTarget.style.transform = 'translateX(0)';
+                                    }}
+                                  >
+                                    <h5 style={{ color: 'var(--text-primary)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                                      {book.title}
+                                    </h5>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', marginBottom: '0.375rem' }}>
+                                      by {book.authors ? book.authors.join(', ') : book.author}
+                                    </p>
+                                    <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', margin: 0 }}>
+                                      {book.description}
+                                    </p>
+                                  </div>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Inline Quiz Data */}
+                    {message.quizData && message.quizData.questions.length > 0 && (
+                      <div
+                        style={{
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--glass-border)',
+                          borderRadius: '0.75rem',
+                          padding: '1.25rem',
+                          marginTop: '1rem',
+                        }}
+                      >
+                        <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <HelpCircle size={18} style={{ color: 'var(--accent-orange)' }} />
+                          Quiz: Test Your Knowledge
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                          {message.quizData.questions.map((question, qIndex) => {
+                            const quizData = message.quizData!;
+                            const userAnswer = quizData.userAnswers[qIndex];
+                            const showResult = quizData.showResults[qIndex];
+                            const isCorrect = userAnswer === question.correctAnswer;
+
+                            return (
+                              <div
+                                key={qIndex}
+                                style={{
+                                  background: 'var(--bg-tertiary)',
+                                  border: '1px solid var(--glass-border)',
+                                  borderRadius: '0.5rem',
+                                  padding: '1rem',
+                                }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                  <h5
+                                    style={{ color: 'var(--text-primary)', fontSize: '0.9375rem', fontWeight: 600, flex: 1 }}
+                                    dangerouslySetInnerHTML={{ __html: `Q${qIndex + 1}: ${renderMath(question.question)}` }}
+                                  />
+                                  <button
+                                    onClick={() => toggleHint(message.id, qIndex)}
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1px solid var(--glass-border)',
+                                      borderRadius: '0.25rem',
+                                      padding: '0.25rem 0.375rem',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.25rem',
+                                      color: 'var(--text-tertiary)',
+                                      fontSize: '0.6875rem',
+                                      transition: 'all 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.borderColor = 'var(--accent-yellow)';
+                                      e.currentTarget.style.color = 'var(--accent-yellow)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.borderColor = 'var(--glass-border)';
+                                      e.currentTarget.style.color = 'var(--text-tertiary)';
+                                    }}
+                                  >
+                                    <Lightbulb size={12} />
+                                    Hint
+                                  </button>
+                                </div>
+
+                                {quizData.showHints[qIndex] && (
+                                  <div
+                                    style={{
+                                      background: 'rgba(255, 193, 7, 0.1)',
+                                      border: '1px solid rgba(255, 193, 7, 0.3)',
+                                      borderRadius: '0.25rem',
+                                      padding: '0.5rem 0.75rem',
+                                      marginBottom: '0.75rem',
+                                      color: 'var(--text-secondary)',
+                                      fontSize: '0.8125rem',
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: `💡 ${renderMath(question.hint)}` }}
+                                  />
+                                )}
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                                  {question.choices.map((choice, cIndex) => {
+                                    const isSelected = userAnswer === cIndex;
+                                    const isCorrectChoice = cIndex === question.correctAnswer;
+                                    let bgColor = 'var(--bg-secondary)';
+                                    let borderColor = 'var(--glass-border)';
+
+                                    if (showResult) {
+                                      if (isSelected && isCorrectChoice) {
+                                        bgColor = 'rgba(34, 197, 94, 0.2)';
+                                        borderColor = 'rgba(34, 197, 94, 0.5)';
+                                      } else if (isSelected && !isCorrectChoice) {
+                                        bgColor = 'rgba(239, 68, 68, 0.2)';
+                                        borderColor = 'rgba(239, 68, 68, 0.5)';
+                                      } else if (isCorrectChoice) {
+                                        bgColor = 'rgba(34, 197, 94, 0.1)';
+                                        borderColor = 'rgba(34, 197, 94, 0.3)';
+                                      }
+                                    }
+
+                                    return (
+                                      <button
+                                        key={cIndex}
+                                        onClick={() => !showResult && handleQuizAnswer(message.id, qIndex, cIndex)}
+                                        disabled={showResult}
+                                        style={{
+                                          background: bgColor,
+                                          border: `1px solid ${borderColor}`,
+                                          borderRadius: '0.25rem',
+                                          padding: '0.5rem 0.75rem',
+                                          cursor: showResult ? 'default' : 'pointer',
+                                          textAlign: 'left',
+                                          color: 'var(--text-primary)',
+                                          fontSize: '0.8125rem',
+                                          transition: 'all 0.2s',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '0.375rem',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          if (!showResult) {
+                                            e.currentTarget.style.borderColor = 'var(--accent-yellow)';
+                                            e.currentTarget.style.background = 'rgba(255, 193, 7, 0.1)';
+                                          }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          if (!showResult) {
+                                            e.currentTarget.style.borderColor = 'var(--glass-border)';
+                                            e.currentTarget.style.background = 'var(--bg-secondary)';
+                                          }
+                                        }}
+                                      >
+                                        <span style={{ fontWeight: 500, minWidth: '1.25rem' }}>
+                                          {String.fromCharCode(65 + cIndex)}.
+                                        </span>
+                                        <span
+                                          style={{ flex: 1 }}
+                                          dangerouslySetInnerHTML={{ __html: renderMath(choice) }}
+                                        />
+                                        {showResult && isSelected && (
+                                          isCorrectChoice ? (
+                                            <CheckCircle2 size={16} style={{ color: 'rgba(34, 197, 94, 1)' }} />
+                                          ) : (
+                                            <XCircle size={16} style={{ color: 'rgba(239, 68, 68, 1)' }} />
+                                          )
+                                        )}
+                                        {showResult && !isSelected && isCorrectChoice && (
+                                          <CheckCircle2 size={16} style={{ color: 'rgba(34, 197, 94, 1)' }} />
+                                        )}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                {showResult && (
+                                  <div
+                                    style={{
+                                      marginTop: '0.75rem',
+                                      padding: '0.5rem 0.75rem',
+                                      borderRadius: '0.25rem',
+                                      background: isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                      color: isCorrect ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)',
+                                      fontSize: '0.8125rem',
+                                      fontWeight: 500,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.375rem',
+                                    }}
+                                  >
+                                    {isCorrect ? (
+                                      <>
+                                        <CheckCircle2 size={16} />
+                                        Correct!
+                                      </>
+                                    ) : (
+                                      <>
+                                        <XCircle size={16} />
+                                        <span dangerouslySetInnerHTML={{ __html: `Incorrect. Answer: ${String.fromCharCode(65 + question.correctAnswer)}` }} />
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
-
-              {/* Topics Section */}
-              {topics.length > 0 && (
-                <div
-                  style={{
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--glass-border)',
-                    borderRadius: '0.75rem',
-                    padding: '1.5rem',
-                    marginTop: '1rem',
-                  }}
-                >
-                  <h3 style={{ color: 'var(--text-primary)', fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Lightbulb size={20} style={{ color: 'var(--accent-yellow)' }} />
-                    Relevant Topics
-                  </h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                    {topics.map((topic, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          background: 'var(--bg-tertiary)',
-                          border: '1px solid var(--glass-border)',
-                          borderRadius: '0.5rem',
-                          padding: '0.5rem 0.75rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.25rem',
-                          minWidth: '120px',
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: 600 }}>
-                            {topic.topic}
-                          </span>
-                          <span style={{ color: 'var(--accent-yellow)', fontSize: '0.75rem', fontWeight: 500 }}>
-                            {Math.round(topic.relevance * 100)}%
-                          </span>
-                        </div>
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '4px',
-                            background: 'var(--bg-secondary)',
-                            borderRadius: '2px',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: `${topic.relevance * 100}%`,
-                              height: '100%',
-                              background: 'var(--accent-yellow)',
-                              transition: 'width 0.3s',
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Recommended Books Section */}
-              {recommendedBooks.length > 0 && (
-                <div
-                  style={{
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--glass-border)',
-                    borderRadius: '0.75rem',
-                    padding: '1.5rem',
-                    marginTop: '1rem',
-                  }}
-                >
-                  <h3 style={{ color: 'var(--text-primary)', fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <BookOpen size={20} style={{ color: 'var(--accent-yellow)' }} />
-                    Recommended Books
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {recommendedBooks.map((book) => {
-                      const bookProblems = practiceProblems[book.id] || [];
-                      const isLoadingBookProblems = loadingProblems[book.id];
-                      
-                      return (
-                        <div key={book.id}>
-                          <Link
-                            href="/books"
-                            style={{
-                              display: 'block',
-                              textDecoration: 'none',
-                              color: 'inherit',
-                            }}
-                          >
-                            <div
-                              style={{
-                                background: 'var(--bg-tertiary)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '0.5rem',
-                                padding: '1rem',
-                                transition: 'all 0.3s',
-                                cursor: 'pointer',
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--accent-yellow)';
-                                e.currentTarget.style.transform = 'translateX(4px)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--glass-border)';
-                                e.currentTarget.style.transform = 'translateX(0)';
-                              }}
-                            >
-                              <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                                {book.title}
-                              </h4>
-                              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                                by {book.authors ? book.authors.join(', ') : book.author}
-                              </p>
-                              <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>
-                                {book.description}
-                              </p>
-                            </div>
-                          </Link>
-                          
-                          {/* Practice Problems Section for this book */}
-                          <div style={{ marginTop: '0.75rem', marginLeft: '1rem' }}>
-                            {!bookProblems.length && !isLoadingBookProblems && (
-                              <button
-                                onClick={() => handleGetPracticeProblems(book.id)}
-                                style={{
-                                  background: 'transparent',
-                                  border: '1px solid var(--glass-border)',
-                                  borderRadius: '0.375rem',
-                                  padding: '0.5rem 0.75rem',
-                                  cursor: 'pointer',
-                                  color: 'var(--text-secondary)',
-                                  fontSize: '0.8125rem',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.5rem',
-                                  transition: 'all 0.3s',
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.borderColor = 'var(--accent-yellow)';
-                                  e.currentTarget.style.color = 'var(--accent-yellow)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.borderColor = 'var(--glass-border)';
-                                  e.currentTarget.style.color = 'var(--text-secondary)';
-                                }}
-                              >
-                                <HelpCircle size={14} />
-                                Get Practice Problems
-                              </button>
-                            )}
-                            
-                            {isLoadingBookProblems && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>
-                                <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                                Finding practice problems...
-                              </div>
-                            )}
-                            
-                            {bookProblems.length > 0 && (
-                              <div
-                                style={{
-                                  background: 'var(--bg-secondary)',
-                                  border: '1px solid var(--glass-border)',
-                                  borderRadius: '0.5rem',
-                                  padding: '0.75rem',
-                                  marginTop: '0.5rem',
-                                }}
-                              >
-                                <h5 style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                                  Recommended Practice Problems
-                                </h5>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                  {bookProblems.map((problem, pIndex) => (
-                                    <div
-                                      key={pIndex}
-                                      style={{
-                                        background: 'var(--bg-tertiary)',
-                                        borderRadius: '0.375rem',
-                                        padding: '0.625rem',
-                                        border: '1px solid var(--glass-border)',
-                                      }}
-                                    >
-                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                          {problem.problemNumber && (
-                                            <span style={{ color: 'var(--accent-yellow)', fontSize: '0.75rem', fontWeight: 600, marginRight: '0.5rem' }}>
-                                              Problems {problem.problemNumber}
-                                            </span>
-                                          )}
-                                          {problem.chapter && (
-                                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginRight: '0.5rem' }}>
-                                              Chapter {problem.chapter}
-                                            </span>
-                                          )}
-                                          {problem.section && (
-                                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginRight: '0.5rem' }}>
-                                              Section {problem.section}
-                                            </span>
-                                          )}
-                                          {problem.pageNumber && (
-                                            <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-                                              Pages {problem.pageNumber}
-                                            </span>
-                                          )}
-                                        </div>
-                                        <span style={{ color: 'var(--accent-yellow)', fontSize: '0.75rem', fontWeight: 500 }}>
-                                          {Math.round(problem.relevance * 100)}% match
-                                        </span>
-                                      </div>
-                                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', margin: 0 }}>
-                                        {problem.description}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Quiz Section */}
-              {quizState && quizState.questions.length > 0 && (
-                <div
-                  style={{
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--glass-border)',
-                    borderRadius: '0.75rem',
-                    padding: '1.5rem',
-                    marginTop: '1rem',
-                  }}
-                >
-                  <h3 style={{ color: 'var(--text-primary)', fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <HelpCircle size={20} style={{ color: 'var(--accent-orange)' }} />
-                    Quiz: Test Your Knowledge
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    {quizState.questions.map((question, qIndex) => {
-                      const userAnswer = quizState.userAnswers[qIndex];
-                      const showResult = quizState.showResults[qIndex];
-                      const isCorrect = userAnswer === question.correctAnswer;
-                      
-                      return (
-                        <div
-                          key={qIndex}
-                          style={{
-                            background: 'var(--bg-tertiary)',
-                            border: '1px solid var(--glass-border)',
-                            borderRadius: '0.5rem',
-                            padding: '1.25rem',
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                            <h4 
-                              style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, flex: 1 }}
-                              dangerouslySetInnerHTML={{ __html: `Question ${qIndex + 1}: ${renderMath(question.question)}` }}
-                            />
-                            <button
-                              onClick={() => toggleHint(qIndex)}
-                              style={{
-                                background: 'transparent',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '0.375rem',
-                                padding: '0.375rem 0.5rem',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                                color: 'var(--text-secondary)',
-                                fontSize: '0.75rem',
-                                transition: 'all 0.3s',
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--accent-yellow)';
-                                e.currentTarget.style.color = 'var(--accent-yellow)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--glass-border)';
-                                e.currentTarget.style.color = 'var(--text-secondary)';
-                              }}
-                            >
-                              <Lightbulb size={14} />
-                              Hint
-                            </button>
-                          </div>
-                          
-                          {quizState.showHints[qIndex] && (
-                            <div
-                              style={{
-                                background: 'rgba(255, 193, 7, 0.1)',
-                                border: '1px solid rgba(255, 193, 7, 0.3)',
-                                borderRadius: '0.375rem',
-                                padding: '0.75rem',
-                                marginBottom: '1rem',
-                                color: 'var(--text-secondary)',
-                                fontSize: '0.875rem',
-                              }}
-                              dangerouslySetInnerHTML={{ __html: `💡 ${renderMath(question.hint)}` }}
-                            />
-                          )}
-                          
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {question.choices.map((choice, cIndex) => {
-                              const isSelected = userAnswer === cIndex;
-                              const isCorrectChoice = cIndex === question.correctAnswer;
-                              const buttonStyle: Record<string, any> = {
-                                background: 'var(--bg-secondary)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '0.375rem',
-                                padding: '0.75rem 1rem',
-                                cursor: showResult ? 'default' : 'pointer',
-                                textAlign: 'left',
-                                color: 'var(--text-primary)',
-                                fontSize: '0.875rem',
-                                transition: 'all 0.3s',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                              };
-                              
-                              if (showResult) {
-                                if (isSelected && isCorrectChoice) {
-                                  buttonStyle.background = 'rgba(34, 197, 94, 0.2)';
-                                  buttonStyle.borderColor = 'rgba(34, 197, 94, 0.5)';
-                                } else if (isSelected && !isCorrectChoice) {
-                                  buttonStyle.background = 'rgba(239, 68, 68, 0.2)';
-                                  buttonStyle.borderColor = 'rgba(239, 68, 68, 0.5)';
-                                } else if (isCorrectChoice) {
-                                  buttonStyle.background = 'rgba(34, 197, 94, 0.1)';
-                                  buttonStyle.borderColor = 'rgba(34, 197, 94, 0.3)';
-                                }
-                              } else if (isSelected) {
-                                buttonStyle.borderColor = 'var(--accent-yellow)';
-                                buttonStyle.background = 'rgba(255, 193, 7, 0.1)';
-                              }
-                              
-                              return (
-                                <button
-                                  key={cIndex}
-                                  onClick={() => !showResult && handleQuizAnswer(qIndex, cIndex)}
-                                  disabled={showResult}
-                                  style={buttonStyle}
-                                  onMouseEnter={(e) => {
-                                    if (!showResult) {
-                                      e.currentTarget.style.borderColor = 'var(--accent-yellow)';
-                                      e.currentTarget.style.background = 'rgba(255, 193, 7, 0.1)';
-                                    }
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    if (!showResult) {
-                                      e.currentTarget.style.borderColor = 'var(--glass-border)';
-                                      e.currentTarget.style.background = 'var(--bg-secondary)';
-                                    }
-                                  }}
-                                >
-                                  <span style={{ fontWeight: 500, minWidth: '1.5rem' }}>
-                                    {String.fromCharCode(65 + cIndex)}.
-                                  </span>
-                                  <span 
-                                    style={{ flex: 1 }}
-                                    dangerouslySetInnerHTML={{ __html: renderMath(choice) }}
-                                  />
-                                  {showResult && isSelected && (
-                                    isCorrectChoice ? (
-                                      <CheckCircle2 size={18} style={{ color: 'rgba(34, 197, 94, 1)' }} />
-                                    ) : (
-                                      <XCircle size={18} style={{ color: 'rgba(239, 68, 68, 1)' }} />
-                                    )
-                                  )}
-                                  {showResult && !isSelected && isCorrectChoice && (
-                                    <CheckCircle2 size={18} style={{ color: 'rgba(34, 197, 94, 1)' }} />
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          
-                          {showResult && (
-                            <div
-                              style={{
-                                marginTop: '1rem',
-                                padding: '0.75rem',
-                                borderRadius: '0.375rem',
-                                background: isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                color: isCorrect ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)',
-                                fontSize: '0.875rem',
-                                fontWeight: 500,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                              }}
-                            >
-                              {isCorrect ? (
-                                <>
-                                  <CheckCircle2 size={18} />
-                                  Correct! Great job!
-                                </>
-                              ) : (
-                                <>
-                                  <XCircle size={18} />
-                                  <span dangerouslySetInnerHTML={{ __html: `Incorrect. The correct answer is ${String.fromCharCode(65 + question.correctAnswer)}: ${renderMath(question.choices[question.correctAnswer])}` }} />
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
               {/* Loading Indicator */}
               {isLoading && (

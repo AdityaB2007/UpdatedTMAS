@@ -43,7 +43,7 @@ export default function BookCard({ book, colorIndex = 0 }: BookCardProps) {
 
   return (
     <Link
-      href="/resources"
+      href={`/resources?book=${book.id}`}
       style={{
         display: 'block',
         height: '100%',
