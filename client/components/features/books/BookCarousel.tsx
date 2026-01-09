@@ -342,22 +342,6 @@ export default function BookCarousel({ books }: BookCarouselProps) {
                     >
                       by {book.authors ? book.authors.join(', ') : book.author}
                     </p>
-
-                    {book.tag && (
-                      <span style={{
-                        display: 'inline-block',
-                        marginTop: '8px',
-                        fontSize: '10px',
-                        fontWeight: '500',
-                        color: colors.icon,
-                        backgroundColor: `${colors.icon}15`,
-                        padding: '3px 6px',
-                        borderRadius: '4px',
-                        width: 'fit-content'
-                      }}>
-                        {book.tag}
-                      </span>
-                    )}
                   </div>
                 </div>
               </Link>

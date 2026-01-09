@@ -144,22 +144,6 @@ export default function BookCard({ book, colorIndex = 0 }: BookCardProps) {
           >
             by {book.authors ? book.authors.join(', ') : book.author}
           </p>
-
-          {book.tag && (
-            <span style={{
-              display: 'inline-block',
-              marginTop: '8px',
-              fontSize: '11px',
-              fontWeight: '500',
-              color: colors.icon,
-              backgroundColor: `${colors.icon}15`,
-              padding: '4px 8px',
-              borderRadius: '4px',
-              width: 'fit-content'
-            }}>
-              {book.tag}
-            </span>
-          )}
         </div>
       </div>
     </Link>

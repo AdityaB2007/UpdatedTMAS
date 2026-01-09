@@ -15,7 +15,7 @@ export default function GridDistortion() {
   const rafRef = useRef<number | null>(null);
 
   // Check if grid should be hidden on this page
-  const isGridHidden = DISABLED_PATHS.includes(pathname);
+  const isGridHidden = pathname ? DISABLED_PATHS.includes(pathname) : false;
 
   const cellSize = 50;
   const magnifyRadius = 100;
