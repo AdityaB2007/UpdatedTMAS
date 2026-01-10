@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, Bot, User, BookOpen, HelpCircle, CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
+import { Send, Loader2, Bot, User, BookOpen, HelpCircle, CheckCircle2, XCircle, Lightbulb, FileText } from 'lucide-react';
 import { marked } from 'marked';
 import { Book } from '@/data/books';
 import Link from 'next/link';
@@ -160,6 +160,16 @@ interface Message {
   booksData?: {
     books: Book[];
     topics: Array<{ topic: string; relevance: number; description: string }>;
+    practiceProblems?: Record<string, Array<{
+      bookId: string;
+      bookTitle: string;
+      problemNumber?: string;
+      pageNumber?: string;
+      chapter?: string;
+      section?: string;
+      description: string;
+      relevance: number;
+    }>>;
   };
 }
 
@@ -473,9 +483,18 @@ export default function ChatbotPage() {
           booksData: {
             books: data.books || [],
             topics: data.topics || [],
+            practiceProblems: data.practiceProblems || {},
           },
         };
         setMessages(prev => [...prev, booksMessage]);
+        
+        // Also update the practice problems state for compatibility with existing code
+        if (data.practiceProblems) {
+          setPracticeProblems(prev => ({
+            ...prev,
+            ...data.practiceProblems
+          }));
+        }
       }
     } catch (error) {
       console.error('Error fetching book recommendations:', error);
@@ -935,7 +954,7 @@ export default function ChatbotPage() {
                     {message.booksData && (
                       <>
                         {/* Topics */}
-                        {message.booksData.topics.length > 0 && (
+                        {message.booksData && message.booksData.topics.length > 0 && (
                           <div
                             style={{
                               background: 'var(--bg-secondary)',
@@ -950,7 +969,7 @@ export default function ChatbotPage() {
                               Relevant Topics
                             </h4>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                              {message.booksData.topics.map((topic, index) => (
+                              {message.booksData?.topics.map((topic, index) => (
                                 <div
                                   key={index}
                                   style={{
@@ -975,7 +994,7 @@ export default function ChatbotPage() {
                           </div>
                         )}
                         {/* Books */}
-                        {message.booksData.books.length > 0 && (
+                        {message.booksData && message.booksData.books.length > 0 && (
                           <div
                             style={{
                               background: 'var(--bg-secondary)',
@@ -990,42 +1009,117 @@ export default function ChatbotPage() {
                               Recommended Books
                             </h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                              {message.booksData.books.map((book) => (
-                                <Link
-                                  key={book.id}
-                                  href={`/resources?book=${book.id}`}
-                                  style={{ textDecoration: 'none', color: 'inherit' }}
-                                >
-                                  <div
-                                    style={{
-                                      background: 'var(--bg-tertiary)',
-                                      border: '1px solid var(--glass-border)',
-                                      borderRadius: '0.5rem',
-                                      padding: '0.875rem',
-                                      transition: 'all 0.2s',
-                                      cursor: 'pointer',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.borderColor = 'var(--accent-yellow)';
-                                      e.currentTarget.style.transform = 'translateX(4px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.borderColor = 'var(--glass-border)';
-                                      e.currentTarget.style.transform = 'translateX(0)';
-                                    }}
-                                  >
-                                    <h5 style={{ color: 'var(--text-primary)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                                      {book.title}
-                                    </h5>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', marginBottom: '0.375rem' }}>
-                                      by {book.authors ? book.authors.join(', ') : book.author}
-                                    </p>
-                                    <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', margin: 0 }}>
-                                      {book.description}
-                                    </p>
+                              {message.booksData?.books.map((book) => {
+                                const bookProblems = message.booksData?.practiceProblems?.[book.id] || [];
+                                return (
+                                  <div key={book.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    <Link
+                                      href={`/resources?book=${book.id}`}
+                                      style={{ textDecoration: 'none', color: 'inherit' }}
+                                    >
+                                      <div
+                                        style={{
+                                          background: 'var(--bg-tertiary)',
+                                          border: '1px solid var(--glass-border)',
+                                          borderRadius: '0.5rem',
+                                          padding: '0.875rem',
+                                          transition: 'all 0.2s',
+                                          cursor: 'pointer',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.borderColor = 'var(--accent-yellow)';
+                                          e.currentTarget.style.transform = 'translateX(4px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.borderColor = 'var(--glass-border)';
+                                          e.currentTarget.style.transform = 'translateX(0)';
+                                        }}
+                                      >
+                                        <h5 style={{ color: 'var(--text-primary)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                                          {book.title}
+                                        </h5>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', marginBottom: '0.375rem' }}>
+                                          by {book.authors ? book.authors.join(', ') : book.author}
+                                        </p>
+                                        <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', margin: 0 }}>
+                                          {book.description}
+                                        </p>
+                                      </div>
+                                    </Link>
+                                    
+                                    {/* Practice Problems */}
+                                    {bookProblems.length > 0 && (
+                                      <div
+                                        style={{
+                                          background: 'var(--bg-tertiary)',
+                                          border: '1px solid var(--glass-border)',
+                                          borderRadius: '0.5rem',
+                                          padding: '0.875rem',
+                                          marginLeft: '0.5rem',
+                                        }}
+                                      >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                          <FileText size={14} style={{ color: 'var(--accent-orange)' }} />
+                                          <h6 style={{ color: 'var(--text-primary)', fontSize: '0.8125rem', fontWeight: 600, margin: 0 }}>
+                                            Recommended Practice Problems
+                                          </h6>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                          {bookProblems.map((problem, idx) => (
+                                            <div
+                                              key={idx}
+                                              style={{
+                                                background: 'var(--bg-secondary)',
+                                                border: '1px solid var(--glass-border)',
+                                                borderRadius: '0.375rem',
+                                                padding: '0.625rem',
+                                              }}
+                                            >
+                                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                                                {problem.problemNumber && (
+                                                  <span style={{ 
+                                                    color: 'var(--accent-orange)', 
+                                                    fontSize: '0.75rem', 
+                                                    fontWeight: 600,
+                                                    background: 'rgba(255, 107, 0, 0.1)',
+                                                    padding: '0.125rem 0.375rem',
+                                                    borderRadius: '0.25rem'
+                                                  }}>
+                                                    Problem {problem.problemNumber}
+                                                  </span>
+                                                )}
+                                                {problem.pageNumber && (
+                                                  <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+                                                    Page {problem.pageNumber}
+                                                  </span>
+                                                )}
+                                                {problem.chapter && (
+                                                  <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+                                                    Chapter {problem.chapter}
+                                                  </span>
+                                                )}
+                                                {problem.section && (
+                                                  <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+                                                    Section {problem.section}
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <p style={{ 
+                                                color: 'var(--text-secondary)', 
+                                                fontSize: '0.75rem', 
+                                                margin: 0,
+                                                lineHeight: 1.4
+                                              }}>
+                                                {problem.description}
+                                              </p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                </Link>
-                              ))}
+                                );
+                              })}
                             </div>
                           </div>
                         )}

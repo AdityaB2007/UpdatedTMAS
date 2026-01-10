@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
-import { findSimilarBooks } from '@/lib/embeddings';
+import { findSimilarBooks, generateEmbedding } from '@/lib/embeddings';
 import { identifyTopics, TopicRelevance } from '@/lib/topic-identification';
 import { books, Book } from '@/data/books';
+import { parsePdfProblems, ExtractedProblem } from '@/lib/pdf-parser';
 
 /**
  * Map topics to relevant book IDs
@@ -42,6 +43,92 @@ function filterBooksByTopic(books: Book[], topics: TopicRelevance[]): Book[] {
   return books;
 }
 
+/**
+ * Calculate cosine similarity between two vectors
+ */
+function cosineSimilarity(vecA: number[], vecB: number[]): number {
+  if (vecA.length !== vecB.length) {
+    throw new Error('Vectors must have the same length');
+  }
+
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+
+  const denominator = Math.sqrt(normA) * Math.sqrt(normB);
+  if (denominator === 0) return 0;
+
+  return dotProduct / denominator;
+}
+
+/**
+ * Find practice problems for a book using PDF parser and embeddings
+ */
+async function findPracticeProblemsForBook(
+  book: Book,
+  userQuery: string
+): Promise<Array<{
+  bookId: string;
+  bookTitle: string;
+  problemNumber?: string;
+  pageNumber?: string;
+  chapter?: string;
+  section?: string;
+  description: string;
+  relevance: number;
+}>> {
+  if (!book.pdfPath) {
+    return [];
+  }
+
+  try {
+    // Parse PDF and extract problems with embeddings
+    const extractedProblems = await parsePdfProblems(book.pdfPath, book.id);
+    
+    if (extractedProblems.length === 0) {
+      return [];
+    }
+    
+    // Generate embedding for user query
+    const queryEmbedding = await generateEmbedding(userQuery);
+    
+    // Calculate similarity scores for problems that have embeddings
+    const problemsWithScores = extractedProblems
+      .filter(p => p.embedding) // Only use problems with embeddings
+      .map(problem => {
+        const similarity = cosineSimilarity(queryEmbedding, problem.embedding!);
+        return {
+          problem,
+          similarity,
+        };
+      })
+      .filter(item => item.similarity > 0.3) // Filter out low similarity
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 3); // Top 3 most relevant problems per book
+    
+    // Convert to PracticeProblem format
+    return problemsWithScores.map(({ problem, similarity }) => ({
+      bookId: book.id,
+      bookTitle: book.title,
+      problemNumber: problem.problemNumber,
+      pageNumber: problem.pageNumber.toString(),
+      chapter: problem.chapter,
+      section: problem.section,
+      description: problem.text.substring(0, 200).trim() + (problem.text.length > 200 ? '...' : ''),
+      relevance: Math.max(0, Math.min(1, similarity)),
+    }));
+  } catch (error) {
+    console.error(`Error finding problems for book ${book.id}:`, error);
+    return [];
+  }
+}
+
 export async function POST(request: NextRequest) {
   let userQuery = '';
   
@@ -67,7 +154,7 @@ export async function POST(request: NextRequest) {
     // Check if OpenAI API key is configured
     if (!process.env.OPENAI_API_KEY) {
       console.warn('OPENAI_API_KEY not set, falling back to keyword matching');
-      return fallbackRecommendations(userQuery);
+      return await fallbackRecommendations(userQuery);
     }
 
     try {
@@ -103,12 +190,47 @@ export async function POST(request: NextRequest) {
       
       // Ensure we return at least some books
       if (recommendedBooks.length === 0) {
-        return fallbackRecommendations(userQuery);
+        return await fallbackRecommendations(userQuery);
+      }
+      
+      // Fetch practice problems for each recommended book that has a PDF
+      const booksWithProblems: Record<string, Array<{
+        bookId: string;
+        bookTitle: string;
+        problemNumber?: string;
+        pageNumber?: string;
+        chapter?: string;
+        section?: string;
+        description: string;
+        relevance: number;
+      }>> = {};
+      
+      // Only fetch problems if OpenAI API is available (needed for embeddings)
+      if (process.env.OPENAI_API_KEY) {
+        // Fetch problems for books with PDFs in parallel (limit to avoid rate limits)
+        const problemPromises = recommendedBooks
+          .filter(book => book.pdfPath)
+          .slice(0, 5) // Limit to top 5 books to avoid too many API calls
+          .map(async (book) => {
+            try {
+              const problems = await findPracticeProblemsForBook(book, searchQuery);
+              if (problems.length > 0) {
+                booksWithProblems[book.id] = problems;
+              }
+            } catch (error) {
+              console.error(`Error fetching problems for ${book.id}:`, error);
+              // Continue with other books even if one fails
+            }
+          });
+        
+        // Wait for all problem fetches to complete (with timeout)
+        await Promise.allSettled(problemPromises);
       }
       
       return new Response(JSON.stringify({ 
         books: recommendedBooks,
-        topics: topics
+        topics: topics,
+        practiceProblems: booksWithProblems
       }), {
         headers: { 'Content-Type': 'application/json' }
       });
@@ -116,13 +238,13 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('Vector embedding search error:', error);
       // Fallback to keyword matching if vector search fails
-      return fallbackRecommendations(userQuery);
+      return await fallbackRecommendations(userQuery);
     }
 
   } catch (error) {
     console.error('Book recommendation error:', error);
     // Fallback to keyword matching - use userQuery if available, otherwise empty string
-    return fallbackRecommendations(userQuery || '');
+    return await fallbackRecommendations(userQuery || '');
   }
 }
 
@@ -130,7 +252,7 @@ export async function POST(request: NextRequest) {
  * Fallback recommendation function using keyword matching
  * Used when OpenAI API is not available or fails
  */
-function fallbackRecommendations(query: string): Response {
+async function fallbackRecommendations(query: string): Promise<Response> {
   const queryLower = query.toLowerCase();
   const keywords: { [key: string]: string[] } = {
     'calculus': ['ACE AP Calculus AB', 'ACE AP Calculus BC'],
@@ -164,7 +286,45 @@ function fallbackRecommendations(query: string): Response {
   // If no matches, return top 3 books
   const resultBooks = matchedBooks.length > 0 ? matchedBooks.slice(0, 5) : books.slice(0, 3);
   
-  return new Response(JSON.stringify({ books: resultBooks }), {
+  // Try to fetch practice problems for fallback books if OpenAI API is available
+  const booksWithProblems: Record<string, Array<{
+    bookId: string;
+    bookTitle: string;
+    problemNumber?: string;
+    pageNumber?: string;
+    chapter?: string;
+    section?: string;
+    description: string;
+    relevance: number;
+  }>> = {};
+  
+  if (process.env.OPENAI_API_KEY) {
+    const booksWithPdfs = resultBooks.filter(book => book.pdfPath).slice(0, 3);
+    const fetchProblems = async () => {
+      const problemPromises = booksWithPdfs.map(async (book) => {
+        try {
+          const problems = await findPracticeProblemsForBook(book, query);
+          if (problems.length > 0) {
+            booksWithProblems[book.id] = problems;
+          }
+        } catch (error) {
+          console.error(`Error fetching problems for ${book.id}:`, error);
+        }
+      });
+      
+      // Wait for all problem fetches to complete
+      if (problemPromises.length > 0) {
+        await Promise.allSettled(problemPromises);
+      }
+    };
+    
+    await fetchProblems();
+  }
+  
+  return new Response(JSON.stringify({ 
+    books: resultBooks,
+    practiceProblems: booksWithProblems
+  }), {
     headers: { 'Content-Type': 'application/json' }
   });
 }
