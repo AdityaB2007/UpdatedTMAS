@@ -179,7 +179,7 @@ We welcome contributions! Here's how you can help:
 2. **Development** - Improve the website and add features
 3. **Outreach** - Help spread the word about TMAS
 
-To join the team, visit [tmasacademy.org/join](https://tmasacademy.org/join) or fill out our volunteer application.
+To join the team, visit us online and fill out our volunteer application.
 
 ## Community
 
